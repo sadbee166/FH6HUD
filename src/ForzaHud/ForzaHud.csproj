@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <None Include="..\..\config\hud.json" Link="hud.json" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="..\..\config\car_ordinals.json" Link="car_ordinals.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\config\car-ordinals.json" Link="car-ordinals.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

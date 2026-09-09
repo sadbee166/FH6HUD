@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RootNamespace>ForzaHud</RootNamespace>
+    <AssemblyName>ForzaHud</AssemblyName>
+    <PlatformTarget>x64</PlatformTarget>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Vortice.Direct2D1" Version="3.6.2" />
+    <PackageReference Include="Vortice.Direct3D11" Version="3.6.2" />
+    <PackageReference Include="Vortice.DirectComposition" Version="3.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\config\hud.json" Link="hud.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\config\Forza Horizon 6 Car Ordinals.json" Link="Forza Horizon 6 Car Ordinals.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

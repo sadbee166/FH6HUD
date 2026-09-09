@@ -1,0 +1,313 @@
+{
+  // ForzaHud configuration.
+  //
+  // Copy this file next to ForzaHud.exe (or into the working directory) and edit it.
+  // Anything omitted here falls back to the built-in default, and unreadable JSON is
+  // reported in forzahud.log and then ignored.
+  //
+  // Comments are allowed: they are stripped before parsing.
+
+  "udp": {
+    // Must match SETTINGS > HUD AND GAMEPLAY > Data Out IP Port in FH6.
+    // Do not use 5200-5300: the game binds its own outgoing socket there.
+    // Use "127.0.0.1" when the HUD runs on the same PC as the game,
+    // or "0.0.0.0" to accept telemetry from another machine or a console.
+    "bindAddress": "127.0.0.1",
+    "port": 2247
+  },
+
+  "units": {
+    // "KilometersPerHour" or "MilesPerHour"
+    "speed": "KilometersPerHour"
+  },
+
+  "overlay": {
+    // 0 is the primary display.
+    "monitor": 0,
+    "opacity": 1.0,
+    // Hide the HUD when FH6 reports that the player is not actively driving.
+    "hideWhenNotDriving": true,
+    "targetFramesPerSecond": 120
+  },
+
+  "visual": {
+    "fontFamily": "Segoe UI",
+    "lineThickness": 2.4,
+
+    "typography": {
+      "labelSize": 11,
+      "valueSize": 26,
+      "gearSize": 42,
+      "primarySize": 58
+    },
+
+    // Reticle radius as a fraction of the smaller screen dimension.
+    "reticleRadius": 0.3,
+    "reticleLevelMarkerLength": 0.15,
+    "spacing": 12,
+
+    // G-force response for the complete panel. Positive longitudinal G is acceleration:
+    // the panel shrinks and moves down. Negative longitudinal G moves it up and enlarges it.
+    // Positive lateral G moves it right. Movement values are fractions of the shorter screen
+    // dimension per G. Sensitivities are signed; negative values reverse their response.
+    "panelMotion": {
+      "enabled": true,
+      // Time constant in milliseconds. 0 disables motion smoothing.
+      "smoothingMilliseconds": 200,
+      "scalePerLongitudinalG": -0.1,
+      "scalePer100Kph": 0.05,
+      "verticalMovePerLongitudinalG": -0.01,
+      "verticalMovePerVerticalG": -0.025,
+      "horizontalMovePerLateralG": -0.033,
+      "rollMultiplier": -1,
+      // Normalized screen-space pivot coordinates: 0 is left/top, 1 is right/bottom.
+      // Yaw rotates around the vertical line at yawPivotX; pitch rotates around the
+      // horizontal line at pitchPivotY, both into the depth axis of the screen.
+      "yawPivotX": 0.5,
+      "pitchPivotY": 0.5,
+      // Depth rotation response. Angular acceleration is in radians per second squared.
+      "yawDegreesPerAngularAcceleration": 5,
+      "pitchDegreesPerAngularAcceleration": 2.5,
+      "maximumYawRotationDegrees": 360.0,
+      "maximumPitchRotationDegrees": 360.0,
+      "levelSpeedAndGear": true,
+      "speedShake": {
+        "enabled": true,
+        "startSpeedKph": 50,
+        "fullStrengthSpeedKph": 200,
+        "amplitude": 0.0025,
+        "frequencyHz": 2
+      },
+      "minimumScale": 0.0,
+      "maximumScale": 32767
+    },
+
+    // Arc meters. arcLength is in degrees, width is in device-independent pixels, and
+    // startValue is in each meter's native unit: RPM, PSI, or 0..1. Steer is signed around
+    // neutral and does not use startValue.
+    // labelOffsetX/Y move only that meter's label and value in device-independent pixels;
+    // both offsets are scaled with the meter and may be negative.
+    // A null color keeps the semantic theme colours, including RPM powerband highlighting.
+    "meters": {
+      "steer":    { "arcLength": 75, "width": 3.2, "color": null, "startValue": 0 },
+      // Lower the calculated peak-power/shift RPM markers on the display without changing
+      // the telemetry-derived values. 5 means 5 percent lower; 0 preserves the raw values.
+      "rpm":      { "arcLength": 90, "width": 3.2, "color": null, "startValue": 0, "yellowZoneOffsetPercent": 0, "redZoneOffsetPercent": 0 },
+      "boost":    { "arcLength": 90, "width": 3.2, "color": null, "startValue": 0, "labelOffsetX": 12, "labelOffsetY": -24 },
+      "brake":    { "arcLength": 90, "width": 3.2, "color": null, "startValue": 0, "labelOffsetX": 12, "labelOffsetY": 0 },
+      "throttle": { "arcLength": 90, "width": 3.2, "color": null, "startValue": 0, "labelOffsetX": 12, "labelOffsetY": -24 }
+    },
+
+    "theme": {
+      "primary":  { "r": 255, "g": 255, "b": 255, "a": 255 },
+      "dim":      { "r": 255, "g": 255, "b": 255, "a": 255 }, // { "r": 78, "g": 97, "b": 105, "a": 255 }
+      "accent":   { "r": 95,  "g": 208, "b": 255, "a": 255 },
+      "warning":  { "r": 255, "g": 179, "b": 39,  "a": 255 },
+      "critical": { "r": 255, "g": 77,  "b": 77,  "a": 255 }
+    },
+
+    // Secondary paint opacity multipliers. These are applied on top of the overlay and
+    // per-element opacity values. Set a value to 1 for fully opaque detail geometry.
+    "opacity": {
+      "arcTrack": 0.5,
+      "arcMarker": 0.85,
+      "arcProminentMarker": 0.85,
+      "reticle": 0.5,
+      "gForceOuterRing": 0.33,
+      "gForceReferenceRing": 0.5,
+      "gForceCrosshair": 0.5,
+      "gForceTrace": 0.5,
+      "tireCenterLine": 0.33,
+      "tireLostGripFill": 0.85,
+      "tireWithinGripOutline": 0.75,
+      "noTelemetryElements": 1,
+      "noTelemetryLabel": 0.85
+    },
+
+    // Smoothing time constants in milliseconds. 0 means none.
+    // Driver inputs are 0 on purpose: the HUD must feel immediate.
+    "smoothing": {
+      "rpmMilliseconds": 50,
+      "pedalMilliseconds": 0,
+      "steerMilliseconds": 0,
+      "gForceMilliseconds": 50,
+      "speedMilliseconds": 0
+    }
+  },
+
+  "telemetry": {
+    "gForce": {
+      // FH6 documents car-local axes as X = right, Y = up, Z = forward, but the sign of
+      // the reported values must be confirmed against a recording before it is trusted.
+      // Record a straight-line pull and a steady left-hander, replay it, and flip whichever
+      // axis reads backwards.
+      "invertLateral": false,
+      "invertLongitudinal": true,
+      "invertVertical": false,
+
+      // Acceleration that maps to the edge of the G indicator. The 1G ring is drawn inside it.
+      "fullScaleG": 1.5
+    },
+
+    "grip": {
+      // FH6 reports normalized slip: 0 is full grip, |value| > 1 is loss of grip.
+      // These are slip thresholds, not "percentage grip".
+      "slipLossThreshold": 1.0,
+      "slipApproachThreshold": 0.65,
+      "lateralSlipThreshold": 0.85,
+      "lockedWheelSpeed": 2.0,
+      "minimumVehicleSpeed": 3.0,
+      "wheelspinExcessRatio": 1.2
+    },
+
+    "tractionControl": {
+      // "Telemetry" infers TCS from telemetry evidence. "Frame" reads the game's TCR
+      // indicator directly from the selected monitor and disables telemetry TCS detection.
+      "enabled": true,
+      "detectionMode": "Frame",
+      // Region defaults are based on the supplied 2560x1440 TCS_ON/TCS_OFF frames.
+      "frame": {
+        "regionX": 0.950,
+        "regionY": 0.925,
+        "regionWidth": 0.025,
+        "regionHeight": 0.020,
+        "minimumOnPixels": 20,
+        "minimumCyanChannel": 120,
+        "minimumCyanDominance": 50
+      },
+      "enginePowerEvidenceEnabled": false,
+      "minimumThrottle": 0.25,
+      "maximumThrottleDecrease": 0.05,
+      // Same-gear RPM drop treated as a transmission/shift transient and suppressed.
+      "minimumShiftRpmDrop": 250,
+      "repeatedCutWindowSamples": 4,
+      "minimumRepeatedCuts": 4,
+      "activationSamples": 4,
+      "deactivationSamples": 4,
+      "attackMilliseconds": 0,
+      "releaseMilliseconds": 0,
+      "maximumTelemetryGapMilliseconds": 150,
+      "shiftSuppressionSamples": 20,
+      "shiftSuppressionMilliseconds": 400,
+      "maximumBrake": 0.05,
+      "maximumClutch": 0.05,
+      "maximumHandBrake": 0.05,
+      "wheelSpeed": {
+        "enabled": true,
+        "filterAlpha": 0.70,
+        "minimumLearningSpeed": 8,
+        "baselineLearningRate": 0.02,
+        "localBaselineLearningRate": 0.02,
+        "minimumDrivenExcess": 0.08,
+        "minimumIndividualExcess": 0.10,
+        "minimumSpinDerivative": 0.50,
+        "minimumCollapse": 0.04,
+        "minimumCollapseRate": 1.50,
+        "confirmationConfidence": 0.45,
+        "modulationWindowMilliseconds": 500,
+        "interventionHoldMilliseconds": 120,
+        "recoveryMilliseconds": 160
+      },
+      // Sustained driven-tyre slip evidence, tuned per drivetrain from recorded sessions.
+      "tireSlip": {
+        "enabled": true,
+        "fwdMinimumDrivenSlip": 0.02,
+        "rwdMinimumDrivenSlip": 0.38,
+        "awdMinimumDrivenSlip": 0.40,
+        "fwdActivationSamples": 16,
+        "rwdActivationSamples": 8,
+        "awdActivationSamples": 14,
+        "deactivationSamples": 32
+      }
+    },
+
+    "powerband": {
+      // The useful powerband is derived from the persisted power curve; FH6 does not transmit it.
+      "binCount": 256,
+      // Short power deficits followed by recovery are removed from the in-memory raw samples.
+      "shapeCleaningEnabled": true,
+      "powerCurveDipFraction": 0.04,
+      "minimumThrottle": 0.99,
+      "minimumSpeed": 5,
+      "maximumRawSamples": 1024,
+      "maximumSamplesPerBin": 16,
+      "minimumSamplesPerBin": 4,
+      "minimumIndependentPassesPerBin": 2,
+      "upperPowerQuantile": 0.80,
+      "smoothingWindowRpm": 350,
+      "robustSmoothingIterations": 2,
+      "shapeCleaningIterations": 3,
+      "sampleResidualThreshold": 0.05,
+      "maximumNarrowValleyRpmSpan": 400,
+      "minimumValleyRecoveryFraction": 0.95,
+      "maximumReliableSpreadFraction": 0.20,
+      "minimumRpmRate": 0,
+      "maximumRpmRate": 20000,
+      "maximumRpmDrop": 50,
+      "rpmRateChangeFraction": 0.35,
+      // Engine power at or above this fraction of peak defines the main power band.
+      "powerbandFraction": 0.95,
+      "effectiveRedlinePercentile": 0.99,
+      // Highest-RPM sample fraction excluded from peak-power selection.
+      "peakPowerTopPercentile": 0.025,
+      // Highest-RPM sample fraction excluded from powerband bounds.
+      "powerbandTopPercentile": 0.025,
+      // Highest-RPM samples used to calculate the maximum practical RPM.
+      "practicalRedlineTopPercentile": 0.3,
+      // Candidate spacing for the practical time-to-speed shift optimizer.
+      "shiftOptimizationCandidateStepRpm": 25,
+      // Minimum retained speed-acceleration samples per gear before using measured timing.
+      "minimumShiftOptimizationSamplesPerGear": 8,
+      // Speed intervals used to integrate predicted time across a shift.
+      "shiftOptimizationSpeedIntegrationSteps": 48
+    }
+  },
+
+  "recording": {
+    "enabled": false,
+    "outputDirectory": "sessions"
+  },
+
+  "calibration": {
+    // Ctrl+Alt+R starts and ends a fresh straight-line calibration run.
+    "dataFile": "forzahud-calibration.json",
+    "rawSamplesDirectory": "forzahud-calibration-raw",
+    "toggleHotkey": "Ctrl+Alt+R",
+    // Set false to disable calibration progress and result messages in the terminal.
+    "verboseOutput": true,
+    "live": {
+      "enabled": true,
+      "allowOverwrite": false,
+      "powerCurve": {
+        "stopSampleCount": 512,
+        "stopRpmCoverageFraction": 0.5,
+        "overwriteShapeErrorThreshold": 0.10
+      },
+      "gearShift": {
+        "minimumSamplesPerGear": 1,
+        "overwriteRatioErrorThreshold": 0.05
+      }
+    }
+  },
+
+  // Element placement. x and y are normalized: (0,0) is the top-left of the overlay,
+  // (1,1) the bottom-right. scale multiplies the element's own geometry, opacity is an
+  // additional multiplier on top of overlay.opacity.
+  //
+  // The default layout follows the reticle arrangement in AGENTS.md:
+  //   steer on the top arc, RPM on the left arc, and boost/brake/throttle nested on the
+  //   right arcs from inner to outer; gear and speed sit across the middle, with G-force
+  //   and tyre grip below.
+  "elements": {
+    "reticle": { "enabled": true, "x": 0.50, "y": 0.50, "scale": 1.0, "opacity": 1 },
+    "steer":   { "enabled": true, "x": 0.50, "y": 0.50, "scale": 1.0, "opacity": 1 },
+    "rpm":     { "enabled": true, "x": 0.50, "y": 0.50, "scale": 1.0, "opacity": 1 },
+    "boost":   { "enabled": true, "x": 0.50, "y": 0.50, "scale": 1.0, "opacity": 1 },
+    "pedals":  { "enabled": true, "x": 0.50, "y": 0.50, "scale": 1.0, "opacity": 1 },
+    "gear":    { "enabled": true, "x": 0.4, "y": 0.50, "scale": 1.0, "opacity": 1 },
+    "speed":   { "enabled": true, "x": 0.6, "y": 0.50, "scale": 1.0, "opacity": 1 },
+    "gforce":  { "enabled": true, "x": 0.50, "y": 0.79, "scale": 1.0, "opacity": 1 },
+    "tires":   { "enabled": true, "x": 0.50, "y": 0.895, "scale": 1.0, "opacity": 1 },
+    "calibration": { "enabled": true, "x": 0.50, "y": 0.075, "scale": 1.0, "opacity": 1 }
+  }
+}

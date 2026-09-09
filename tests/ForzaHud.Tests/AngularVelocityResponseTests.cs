@@ -27,7 +27,7 @@ public sealed class AngularVelocityResponseTests
     }
 
     [Fact]
-    public void VehicleStateProcessorDerivesAngularAccelerationFromPacketTime()
+    public void VehicleStateProcessorUsesAngularVelocityDirectly()
     {
         var processor = new VehicleStateProcessor(new HudConfiguration());
         var first = TelemetrySnapshot.Empty with
@@ -47,14 +47,14 @@ public sealed class AngularVelocityResponseTests
         var firstState = processor.Process(first);
         var secondState = processor.Process(second);
 
-        Assert.Equal(0f, firstState.PitchAngularAcceleration);
-        Assert.Equal(0f, firstState.YawAngularAcceleration);
-        Assert.Equal(2f, secondState.PitchAngularAcceleration, precision: 4);
-        Assert.Equal(4f, secondState.YawAngularAcceleration, precision: 4);
+        Assert.Equal(1f, firstState.PitchAngularVelocity);
+        Assert.Equal(-2f, firstState.YawAngularVelocity);
+        Assert.Equal(1.5f, secondState.PitchAngularVelocity, precision: 4);
+        Assert.Equal(-1f, secondState.YawAngularVelocity, precision: 4);
     }
 
     [Fact]
-    public void VehicleStateProcessorResetsAngularAccelerationAcrossNonDrivingFrame()
+    public void VehicleStateProcessorUsesAngularVelocityAcrossNonDrivingFrames()
     {
         var processor = new VehicleStateProcessor(new HudConfiguration());
         processor.Process(TelemetrySnapshot.Empty with
@@ -64,13 +64,16 @@ public sealed class AngularVelocityResponseTests
             AngularVelocityY = 1f,
             ReceivedAt = TimeSpan.FromSeconds(1),
         });
-        processor.Process(TelemetrySnapshot.Empty with
+        var paused = processor.Process(TelemetrySnapshot.Empty with
         {
             IsRaceOn = false,
             AngularVelocityX = 10f,
             AngularVelocityY = 10f,
             ReceivedAt = TimeSpan.FromSeconds(2),
         });
+
+        Assert.Equal(10f, paused.PitchAngularVelocity);
+        Assert.Equal(10f, paused.YawAngularVelocity);
 
         var resumed = processor.Process(TelemetrySnapshot.Empty with
         {
@@ -80,12 +83,12 @@ public sealed class AngularVelocityResponseTests
             ReceivedAt = TimeSpan.FromSeconds(3),
         });
 
-        Assert.Equal(0f, resumed.PitchAngularAcceleration);
-        Assert.Equal(0f, resumed.YawAngularAcceleration);
+        Assert.Equal(20f, resumed.PitchAngularVelocity);
+        Assert.Equal(20f, resumed.YawAngularVelocity);
     }
 
     [Fact]
-    public void HudEngineSmoothsAndResetsAngularAcceleration()
+    public void HudEngineSmoothsAndResetsAngularVelocity()
     {
         var configuration = new HudConfiguration();
         configuration.Visual.PanelMotion.SmoothingMilliseconds = 100;
@@ -95,42 +98,42 @@ public sealed class AngularVelocityResponseTests
         engine.Update(
             new DerivedState
             {
-                PitchAngularAcceleration = 10f,
-                YawAngularAcceleration = -10f,
+                PitchAngularVelocity = 10f,
+                YawAngularVelocity = -10f,
             },
             deltaSeconds: 0.05);
 
-        Assert.InRange(engine.Display.PanelMotionPitchAngularAcceleration, 0f, 10f);
-        Assert.InRange(engine.Display.PanelMotionYawAngularAcceleration, -10f, 0f);
+        Assert.InRange(engine.Display.PanelMotionPitchAngularVelocity, 0f, 10f);
+        Assert.InRange(engine.Display.PanelMotionYawAngularVelocity, -10f, 0f);
 
         var reset = new DerivedState
         {
-            PitchAngularAcceleration = -4f,
-            YawAngularAcceleration = 3f,
+            PitchAngularVelocity = -4f,
+            YawAngularVelocity = 3f,
         };
         engine.Reset(reset);
         engine.Update(reset, deltaSeconds: 0.05);
 
-        Assert.Equal(-4f, engine.Display.PanelMotionPitchAngularAcceleration);
-        Assert.Equal(3f, engine.Display.PanelMotionYawAngularAcceleration);
+        Assert.Equal(-4f, engine.Display.PanelMotionPitchAngularVelocity);
+        Assert.Equal(3f, engine.Display.PanelMotionYawAngularVelocity);
     }
 
     [Fact]
-    public void PanelMotionCalculatorMapsAngularAccelerationToBoundedDepthAngles()
+    public void PanelMotionCalculatorMapsAngularVelocityToBoundedDepthAngles()
     {
         var settings = new PanelMotionSettings
         {
             Enabled = true,
-            YawDegreesPerAngularAcceleration = 2f,
-            PitchDegreesPerAngularAcceleration = 3f,
+            YawDegreesPerAngularVelocity = 2f,
+            PitchDegreesPerAngularVelocity = 3f,
             MaximumYawRotationDegrees = 5f,
             MaximumPitchRotationDegrees = 6f,
             SpeedShake = new SpeedShakeSettings { Enabled = false },
         };
         var display = new HudDisplay
         {
-            PanelMotionYawAngularAcceleration = 4f,
-            PanelMotionPitchAngularAcceleration = -4f,
+            PanelMotionYawAngularVelocity = 4f,
+            PanelMotionPitchAngularVelocity = -4f,
         };
 
         var motion = PanelMotionCalculator.Calculate(display, settings, reference: 1000f);
@@ -160,8 +163,8 @@ public sealed class AngularVelocityResponseTests
         configuration.Visual.PanelMotion.SpeedShake.Enabled = false;
 
         var engine = new HudEngine(configuration);
-        engine.Display.PanelMotionYawAngularAcceleration = 2f;
-        engine.Display.PanelMotionPitchAngularAcceleration = -3f;
+        engine.Display.PanelMotionYawAngularVelocity = 2f;
+        engine.Display.PanelMotionPitchAngularVelocity = -3f;
 
         var context = new DepthTrackingRenderContext();
         new HudRenderer(configuration).Draw(

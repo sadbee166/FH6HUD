@@ -29,8 +29,8 @@ public sealed class HudEngine
     private SmoothValue _panelMotionLongitudinalG;
     private SmoothValue _panelMotionVerticalG;
     private SmoothValue _panelMotionRollDegrees;
-    private SmoothValue _panelMotionPitchAngularAcceleration;
-    private SmoothValue _panelMotionYawAngularAcceleration;
+    private SmoothValue _panelMotionPitchAngularVelocity;
+    private SmoothValue _panelMotionYawAngularVelocity;
 
     private readonly HudConfiguration _configuration;
 
@@ -84,12 +84,12 @@ public sealed class HudEngine
             state.RollDegrees,
             panelMotionSmoothing,
             deltaSeconds);
-        Display.PanelMotionPitchAngularAcceleration = (float)_panelMotionPitchAngularAcceleration.Update(
-            state.PitchAngularAcceleration,
+        Display.PanelMotionPitchAngularVelocity = (float)_panelMotionPitchAngularVelocity.Update(
+            state.PitchAngularVelocity,
             panelMotionSmoothing,
             deltaSeconds);
-        Display.PanelMotionYawAngularAcceleration = (float)_panelMotionYawAngularAcceleration.Update(
-            state.YawAngularAcceleration,
+        Display.PanelMotionYawAngularVelocity = (float)_panelMotionYawAngularVelocity.Update(
+            state.YawAngularVelocity,
             panelMotionSmoothing,
             deltaSeconds);
 
@@ -123,8 +123,8 @@ public sealed class HudEngine
         _panelMotionLongitudinalG.Reset(state.LongitudinalG);
         _panelMotionVerticalG.Reset(state.VerticalG);
         _panelMotionRollDegrees.Reset(state.RollDegrees);
-        _panelMotionPitchAngularAcceleration.Reset(state.PitchAngularAcceleration);
-        _panelMotionYawAngularAcceleration.Reset(state.YawAngularAcceleration);
+        _panelMotionPitchAngularVelocity.Reset(state.PitchAngularVelocity);
+        _panelMotionYawAngularVelocity.Reset(state.YawAngularVelocity);
         Display.AnimationTimeSeconds = 0d;
     }
 }

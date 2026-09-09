@@ -53,8 +53,8 @@
     "panelMotion": {
       "enabled": true,
       // 以毫秒为单位的时间常数。0 表示禁用运动平滑。
-      "smoothingMilliseconds": 200,
-      "scalePerLongitudinalG": -0.1,
+      "smoothingMilliseconds": 150,
+      "scalePerLongitudinalG": -0.15,
       "scalePer100Kph": 0.05,
       "verticalMovePerLongitudinalG": -0.01,
       "verticalMovePerVerticalG": -0.025,
@@ -65,16 +65,16 @@
       // pitchPivotY 指定的横线旋转；二者都会沿屏幕深度轴产生旋转。
       "yawPivotX": 0.5,
       "pitchPivotY": 0.5,
-      // 深度旋转响应。角加速度单位为弧度/秒²。
-      "yawDegreesPerAngularAcceleration": 5,
-      "pitchDegreesPerAngularAcceleration": 2.5,
+      // 深度旋转响应。角速度单位为弧度/秒。
+      "yawDegreesPerAngularVelocity": 20,
+      "pitchDegreesPerAngularVelocity": 20,
       "maximumYawRotationDegrees": 360.0,
       "maximumPitchRotationDegrees": 360.0,
       "levelSpeedAndGear": true,
       "speedShake": {
         "enabled": true,
         "startSpeedKph": 50,
-        "fullStrengthSpeedKph": 200,
+        "fullStrengthSpeedKph": 300,
         "amplitude": 0.0025,
         "frequencyHz": 2
       },
@@ -112,7 +112,7 @@
       "arcTrack": 0.5,
       "arcMarker": 0.85,
       "arcProminentMarker": 0.85,
-      "reticle": 0.5,
+      "reticle": 0.85,
       "gForceOuterRing": 0.33,
       "gForceReferenceRing": 0.5,
       "gForceCrosshair": 0.5,

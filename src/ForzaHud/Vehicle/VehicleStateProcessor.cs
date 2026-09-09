@@ -33,11 +33,6 @@ public sealed class VehicleStateProcessor
     private LiveCalibrationState _liveState = LiveCalibrationState.Identifying;
     private VehicleCalibration? _liveMatchedCalibration;
     private bool _powerCollectionFinished;
-    private bool _angularVelocityInitialized;
-    private bool _previousAngularVelocityFrameWasDriving;
-    private TimeSpan _previousAngularVelocityAt;
-    private float _previousAngularVelocityX;
-    private float _previousAngularVelocityY;
     private bool _powerSampleAffectedByTcs;
 
     public VehicleStateProcessor(
@@ -211,11 +206,6 @@ public sealed class VehicleStateProcessor
             }
         }
 
-        if (identityChanged)
-        {
-            _angularVelocityInitialized = false;
-        }
-
         _powerband.UpdateVehicle(snapshot);
 
         var usesFrameTcs = _configuration.Telemetry.TractionControl.DetectionMode == TcsDetectionMode.Frame;
@@ -302,8 +292,6 @@ public sealed class VehicleStateProcessor
 
         var grip = GripAnalyzer.Analyze(snapshot, _configuration.Telemetry.Grip);
         var worst = GripAnalyzer.Worst(grip);
-        var angularAcceleration = CalculateAngularAcceleration(snapshot);
-
         return new DerivedState
         {
             IsDriving = snapshot.IsRaceOn,
@@ -331,8 +319,8 @@ public sealed class VehicleStateProcessor
             LateralG = GForceCalculator.Lateral(snapshot.AccelerationX, _configuration.Telemetry.GForce),
             LongitudinalG = GForceCalculator.Longitudinal(snapshot.AccelerationZ, _configuration.Telemetry.GForce),
             VerticalG = GForceCalculator.Vertical(snapshot.AccelerationY, _configuration.Telemetry.GForce),
-            PitchAngularAcceleration = angularAcceleration.Pitch,
-            YawAngularAcceleration = angularAcceleration.Yaw,
+            PitchAngularVelocity = snapshot.AngularVelocityX,
+            YawAngularVelocity = snapshot.AngularVelocityY,
             Powerband = displayPowerband,
             TractionControlActive = tractionControlActive,
             WheelSpeedTcsEvidence = _tractionControl.WheelSpeedEvidence,
@@ -340,30 +328,6 @@ public sealed class VehicleStateProcessor
             WorstTireGrip = worst,
             HasGripLoss = GripAnalyzer.IsGripLoss(worst),
         };
-    }
-
-    private (float Pitch, float Yaw) CalculateAngularAcceleration(TelemetrySnapshot snapshot)
-    {
-        var pitch = 0f;
-        var yaw = 0f;
-
-        if (_angularVelocityInitialized
-            && _previousAngularVelocityFrameWasDriving
-            && snapshot.IsRaceOn
-            && snapshot.ReceivedAt > _previousAngularVelocityAt)
-        {
-            var deltaSeconds = (float)(snapshot.ReceivedAt - _previousAngularVelocityAt).TotalSeconds;
-            pitch = (snapshot.AngularVelocityX - _previousAngularVelocityX) / deltaSeconds;
-            yaw = (snapshot.AngularVelocityY - _previousAngularVelocityY) / deltaSeconds;
-        }
-
-        _previousAngularVelocityX = snapshot.AngularVelocityX;
-        _previousAngularVelocityY = snapshot.AngularVelocityY;
-        _previousAngularVelocityAt = snapshot.ReceivedAt;
-        _previousAngularVelocityFrameWasDriving = snapshot.IsRaceOn;
-        _angularVelocityInitialized = true;
-
-        return (pitch, yaw);
     }
 
     private void ResetLiveVehicle(VehicleIdentity identity)

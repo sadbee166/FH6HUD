@@ -54,11 +54,11 @@ public sealed class HudDisplay
     /// <summary>Roll angle in degrees after the panel-motion-specific smoothing.</summary>
     public float PanelMotionRollDegrees { get; set; }
 
-    /// <summary>Pitch angular acceleration after the panel-motion-specific smoothing.</summary>
-    public float PanelMotionPitchAngularAcceleration { get; set; }
+    /// <summary>Pitch angular velocity after the panel-motion-specific smoothing.</summary>
+    public float PanelMotionPitchAngularVelocity { get; set; }
 
-    /// <summary>Yaw angular acceleration after the panel-motion-specific smoothing.</summary>
-    public float PanelMotionYawAngularAcceleration { get; set; }
+    /// <summary>Yaw angular velocity after the panel-motion-specific smoothing.</summary>
+    public float PanelMotionYawAngularVelocity { get; set; }
 }
 
 /// <summary>

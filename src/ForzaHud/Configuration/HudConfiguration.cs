@@ -290,11 +290,11 @@ public sealed class PanelMotionSettings
     /// <summary>Normalized screen-space Y coordinate of the pitch rotation pivot.</summary>
     public float PitchPivotY { get; set; } = 0.5f;
 
-    /// <summary>Yaw rotation degrees produced by one radian per second squared of yaw acceleration.</summary>
-    public float YawDegreesPerAngularAcceleration { get; set; } = 1f;
+    /// <summary>Yaw rotation degrees produced by one radian per second of yaw angular velocity.</summary>
+    public float YawDegreesPerAngularVelocity { get; set; } = 1f;
 
-    /// <summary>Pitch rotation degrees produced by one radian per second squared of pitch acceleration.</summary>
-    public float PitchDegreesPerAngularAcceleration { get; set; } = 1f;
+    /// <summary>Pitch rotation degrees produced by one radian per second of pitch angular velocity.</summary>
+    public float PitchDegreesPerAngularVelocity { get; set; } = 1f;
 
     /// <summary>Largest absolute yaw depth-rotation angle in degrees.</summary>
     public float MaximumYawRotationDegrees { get; set; } = 12f;

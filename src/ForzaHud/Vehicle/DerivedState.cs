@@ -75,11 +75,11 @@ public sealed class DerivedState
     /// <summary>Vertical acceleration in G. Positive is upwards, subject to configuration.</summary>
     public float VerticalG { get; set; }
 
-    /// <summary>Angular acceleration derived from AngularVelocityX, in radians per second squared.</summary>
-    public float PitchAngularAcceleration { get; set; }
+    /// <summary>Pitch angular velocity from AngularVelocityX, in radians per second.</summary>
+    public float PitchAngularVelocity { get; set; }
 
-    /// <summary>Angular acceleration derived from AngularVelocityY, in radians per second squared.</summary>
-    public float YawAngularAcceleration { get; set; }
+    /// <summary>Yaw angular velocity from AngularVelocityY, in radians per second.</summary>
+    public float YawAngularVelocity { get; set; }
 
     /// <summary>Learned powerband for the current car.</summary>
     public PowerbandState Powerband { get; set; } = PowerbandState.Empty;

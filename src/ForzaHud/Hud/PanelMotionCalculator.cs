@@ -35,13 +35,13 @@ public readonly record struct PanelMotion(
     }
 }
 
-/// <summary>Maps smoothed G-force, roll, and angular-acceleration values to the panel transform.</summary>
+/// <summary>Maps smoothed G-force, roll, and angular-velocity values to the panel transform.</summary>
 public static class PanelMotionCalculator
 {
     /// <summary>
     /// Calculates the current panel transform. Positive longitudinal G shrinks and moves
     /// down; negative longitudinal G enlarges and moves up. Lateral G moves in its signed
-    /// force direction. Roll angle rotates around the panel anchor. Angular acceleration
+    /// force direction. Roll angle rotates around the panel anchor. Angular velocity
     /// produces bounded yaw and pitch depth angles.
     /// </summary>
     public static PanelMotion Calculate(
@@ -71,11 +71,11 @@ public static class PanelMotionCalculator
 
         var rotation = display.PanelMotionRollDegrees * settings.RollMultiplier;
         var depthYaw = Math.Clamp(
-            display.PanelMotionYawAngularAcceleration * settings.YawDegreesPerAngularAcceleration,
+            display.PanelMotionYawAngularVelocity * settings.YawDegreesPerAngularVelocity,
             -settings.MaximumYawRotationDegrees,
             settings.MaximumYawRotationDegrees);
         var depthPitch = Math.Clamp(
-            display.PanelMotionPitchAngularAcceleration * settings.PitchDegreesPerAngularAcceleration,
+            display.PanelMotionPitchAngularVelocity * settings.PitchDegreesPerAngularVelocity,
             -settings.MaximumPitchRotationDegrees,
             settings.MaximumPitchRotationDegrees);
 

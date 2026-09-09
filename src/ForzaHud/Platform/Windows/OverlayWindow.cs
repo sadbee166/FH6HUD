@@ -40,6 +40,7 @@ public sealed class OverlayWindow : IDisposable
     private int _pixelHeight;
     private int _activeMonitorIndex;
     private bool _calibrationHotkeyRegistered;
+    private bool _presenterRefreshPending;
 
     /// <param name="configuration">HUD configuration.</param>
     /// <param name="factory">Shared Direct2D factory.</param>
@@ -202,9 +203,13 @@ public sealed class OverlayWindow : IDisposable
         RegisterCalibrationHotkey();
 
         // The DirectWrite formats cache the configured font family. Recreate the presenter so
-        // a font change takes effect on the next frame.
-        _presenter?.Dispose();
-        _presenter = null;
+        // a font change takes effect on the next frame. Defer disposal when this is called from
+        // the active render callback; disposing the current render target there invalidates the
+        // context before DirectCompositionPresenter.Render has finished with it.
+        if (_presenter is not null)
+        {
+            _presenterRefreshPending = true;
+        }
     }
 
     /// <summary>Stops the message loop on the window's thread.</summary>
@@ -328,13 +333,30 @@ public sealed class OverlayWindow : IDisposable
         }
 
         _presenter ??= new DirectCompositionPresenter(_handle, _factory, _textFactory, _configuration.Visual);
+        var presenter = _presenter;
 
-        _presenter.Resize(_pixelWidth, _pixelHeight, dpi);
-        _presenter.Render(context => Render?.Invoke(context));
+        presenter.Resize(_pixelWidth, _pixelHeight, dpi);
+        try
+        {
+            presenter.Render(context => Render?.Invoke(context));
+        }
+        finally
+        {
+            if (_presenterRefreshPending)
+            {
+                _presenterRefreshPending = false;
+                presenter.Dispose();
+                if (ReferenceEquals(_presenter, presenter))
+                {
+                    _presenter = null;
+                }
+            }
+        }
     }
 
     public void Dispose()
     {
+        _presenterRefreshPending = false;
         _presenter?.Dispose();
         _presenter = null;
 

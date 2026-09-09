@@ -433,6 +433,9 @@ public enum TcsDetectionMode
 /// <summary>Settings for reading the in-game TCR indicator from a captured screen region.</summary>
 public sealed class FrameTcsSettings
 {
+    /// <summary>Whether to draw the configured detection region on the HUD for calibration.</summary>
+    public bool ShowDetectionZone { get; set; }
+
     /// <summary>Left edge of the indicator region as a fraction of the selected monitor.</summary>
     public float RegionX { get; set; } = 0.950f;
 

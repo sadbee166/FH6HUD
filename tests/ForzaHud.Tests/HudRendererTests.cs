@@ -104,6 +104,53 @@ public sealed class HudRendererTests
         });
     }
 
+    [Fact]
+    public void FrameTcsDetectionZoneDrawsOnlyWhenEnabledInFrameMode()
+    {
+        var configuration = new HudConfiguration();
+        configuration.Telemetry.TractionControl.DetectionMode = TcsDetectionMode.Frame;
+        configuration.Telemetry.TractionControl.Frame.ShowDetectionZone = true;
+        foreach (var id in configuration.Elements.Keys.ToArray())
+        {
+            configuration.Elements[id] = configuration.Elements[id] with { Enabled = false };
+        }
+
+        var context = new RecordingRenderContext();
+
+        new HudRenderer(configuration).Draw(
+            context,
+            new HudEngine(configuration),
+            new DerivedState(),
+            hasTelemetry: false);
+
+        var rect = Assert.Single(context.Rectangles);
+        Assert.Equal(1824f, rect.X);
+        Assert.Equal(999f, rect.Y);
+        Assert.Equal(48f, rect.Width);
+        Assert.Equal(21.6f, rect.Height, precision: 3);
+
+        configuration.Telemetry.TractionControl.DetectionMode = TcsDetectionMode.Telemetry;
+        context = new RecordingRenderContext();
+        new HudRenderer(configuration).Draw(
+            context,
+            new HudEngine(configuration),
+            new DerivedState(),
+            hasTelemetry: false);
+
+        Assert.Empty(context.Rectangles);
+
+        configuration.Telemetry.TractionControl.Enabled = false;
+        configuration.Telemetry.TractionControl.DetectionMode = TcsDetectionMode.Frame;
+        context = new RecordingRenderContext();
+        new HudRenderer(configuration).Draw(
+            context,
+            new HudEngine(configuration),
+            new DerivedState(),
+            hasTelemetry: false);
+
+        Assert.Empty(context.Rectangles);
+    }
+
     private sealed class RecordingRenderContext : IRenderContext
     {
         public float Width => 1920;
@@ -116,6 +163,8 @@ public sealed class HudRendererTests
 
         public List<HudPaint> Paints { get; } = [];
 
+        public List<HudRect> Rectangles { get; } = [];
+
         public void DrawLine(HudPoint from, HudPoint to, HudPaint paint, float thickness) => DrawCallCount++;
 
         public void DrawArc(HudPoint center, float radiusX, float radiusY, float startAngle, float sweepAngle, HudPaint paint, float thickness) => DrawCallCount++;
@@ -124,7 +173,11 @@ public sealed class HudRendererTests
 
         public void FillEllipse(HudPoint center, float radiusX, float radiusY, HudPaint paint) => DrawCallCount++;
 
-        public void DrawRect(HudRect rect, HudPaint paint, float thickness) => DrawCallCount++;
+        public void DrawRect(HudRect rect, HudPaint paint, float thickness)
+        {
+            DrawCallCount++;
+            Rectangles.Add(rect);
+        }
 
         public void FillRect(HudRect rect, HudPaint paint) => DrawCallCount++;
 

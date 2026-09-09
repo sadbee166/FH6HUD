@@ -58,6 +58,19 @@ public sealed class HudRenderer
             DrawCalibrationIndicator(context, engine, state);
         }
 
+        var tractionControl = _configuration.Telemetry.TractionControl;
+        if (tractionControl.Enabled
+            && tractionControl.DetectionMode == TcsDetectionMode.Frame
+            && tractionControl.Frame.ShowDetectionZone)
+        {
+            FrameTcsDebugOverlay.Draw(
+                context,
+                tractionControl.Frame,
+                _theme,
+                _configuration.Visual,
+                (float)_configuration.Overlay.Opacity);
+        }
+
         if (_configuration.Overlay.HideWhenNotDriving && (!hasTelemetry || !state.IsDriving))
         {
             return;

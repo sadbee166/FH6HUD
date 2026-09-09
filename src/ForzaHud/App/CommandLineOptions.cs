@@ -160,7 +160,9 @@ public sealed class CommandLineOptions
           --help                Show this text.
 
         While the overlay is running, Ctrl+Alt+H closes it, Ctrl+Alt+K deletes calibration
-        records for the current car, and Ctrl+Alt+L reloads the utility.
+        records for the current car, and Ctrl+Alt+L reloads the utility. Valid edits to the
+        active configuration file are applied automatically before the next HUD frame.
+        Invalid edits are ignored until the file becomes valid again.
         During replay, SPACE pauses, S steps a frame, R restarts, and +/- change speed.
         """;
 

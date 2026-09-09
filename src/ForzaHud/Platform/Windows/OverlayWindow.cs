@@ -38,6 +38,8 @@ public sealed class OverlayWindow : IDisposable
     private DirectCompositionPresenter? _presenter;
     private int _pixelWidth;
     private int _pixelHeight;
+    private int _activeMonitorIndex;
+    private bool _calibrationHotkeyRegistered;
 
     /// <param name="configuration">HUD configuration.</param>
     /// <param name="factory">Shared Direct2D factory.</param>
@@ -73,9 +75,10 @@ public sealed class OverlayWindow : IDisposable
     /// <summary>
     /// Creates the window and runs the message and render loop until the window is closed
     /// or a control hotkey is pressed. Ctrl+Alt+H exits, Ctrl+Alt+K deletes the current
-    /// vehicle's calibration records, and Ctrl+Alt+L restarts the utility. The calibration
-    /// hotkey is registered from <see cref="CalibrationSettings.ToggleHotkey"/> only when
-    /// live calibration is disabled.
+    /// vehicle's calibration records, and Ctrl+Alt+L restarts the utility. Valid edits to the
+    /// active configuration file are applied automatically before the next HUD frame. The
+    /// calibration hotkey is registered from <see cref="CalibrationSettings.ToggleHotkey"/>
+    /// only when live calibration is disabled.
     /// </summary>
     public void Run()
     {
@@ -84,6 +87,7 @@ public sealed class OverlayWindow : IDisposable
         RegisterWindowClass();
 
         var monitor = MonitorHelper.Get(_configuration.Overlay.Monitor);
+        _activeMonitorIndex = _configuration.Overlay.Monitor;
         _pixelWidth = monitor.Width;
         _pixelHeight = monitor.Height;
 
@@ -109,7 +113,6 @@ public sealed class OverlayWindow : IDisposable
             SWP_NOACTIVATE | SWP_SHOWWINDOW);
 
         var exitRegistered = false;
-        var calibrationRegistered = false;
         var deleteCalibrationRegistered = false;
         var reloadRegistered = false;
         try
@@ -119,15 +122,7 @@ public sealed class OverlayWindow : IDisposable
                 NativeMethods.MOD_CONTROL | NativeMethods.MOD_ALT | NativeMethods.MOD_NOREPEAT,
                 VirtualKeyH);
 
-            if (!_configuration.Calibration.Live.Enabled
-                && HotkeyDefinition.TryParse(_configuration.Calibration.ToggleHotkey, out var hotkey))
-            {
-                calibrationRegistered = NativeMethods.RegisterHotKey(
-                    _handle,
-                    CalibrationHotKeyId,
-                    hotkey.Modifiers | NativeMethods.MOD_NOREPEAT,
-                    hotkey.VirtualKey);
-            }
+            RegisterCalibrationHotkey();
 
             deleteCalibrationRegistered = NativeMethods.RegisterHotKey(
                 _handle,
@@ -156,10 +151,7 @@ public sealed class OverlayWindow : IDisposable
                 NativeMethods.UnregisterHotKey(_handle, DeleteCalibrationHotKeyId);
             }
 
-            if (calibrationRegistered)
-            {
-                NativeMethods.UnregisterHotKey(_handle, CalibrationHotKeyId);
-            }
+            UnregisterCalibrationHotkey();
 
             if (exitRegistered)
             {
@@ -182,6 +174,39 @@ public sealed class OverlayWindow : IDisposable
         | NativeMethods.WS_EX_NOACTIVATE
         | NativeMethods.WS_EX_LAYERED;
 
+    /// <summary>Applies configuration changes that affect the window or its presentation.</summary>
+    public void ApplyConfiguration()
+    {
+        if (_handle == IntPtr.Zero)
+        {
+            return;
+        }
+
+        if (_activeMonitorIndex != _configuration.Overlay.Monitor)
+        {
+            var monitor = MonitorHelper.Get(_configuration.Overlay.Monitor);
+            _activeMonitorIndex = _configuration.Overlay.Monitor;
+            _pixelWidth = monitor.Width;
+            _pixelHeight = monitor.Height;
+            NativeMethods.SetWindowPos(
+                _handle,
+                NativeMethods.HWND_TOPMOST,
+                monitor.Left,
+                monitor.Top,
+                monitor.Width,
+                monitor.Height,
+                SWP_NOACTIVATE | SWP_SHOWWINDOW);
+        }
+
+        UnregisterCalibrationHotkey();
+        RegisterCalibrationHotkey();
+
+        // The DirectWrite formats cache the configured font family. Recreate the presenter so
+        // a font change takes effect on the next frame.
+        _presenter?.Dispose();
+        _presenter = null;
+    }
+
     /// <summary>Stops the message loop on the window's thread.</summary>
     public void RequestClose()
     {
@@ -193,12 +218,13 @@ public sealed class OverlayWindow : IDisposable
 
     private void MessageLoop()
     {
-        var frameInterval = TimeSpan.FromSeconds(1d / Math.Clamp(_configuration.Overlay.TargetFramesPerSecond, 10, 480));
         var clock = System.Diagnostics.Stopwatch.StartNew();
         var nextFrame = clock.Elapsed;
 
         while (true)
         {
+            var frameInterval = TimeSpan.FromSeconds(
+                1d / Math.Clamp(_configuration.Overlay.TargetFramesPerSecond, 10, 480));
             var waitMilliseconds = WaitMilliseconds(nextFrame - clock.Elapsed);
             var waitResult = NativeMethods.MsgWaitForMultipleObjectsEx(
                 0,
@@ -230,6 +256,31 @@ public sealed class OverlayWindow : IDisposable
             }
 
             RenderFrame();
+        }
+    }
+
+    private void RegisterCalibrationHotkey()
+    {
+        if (_handle == IntPtr.Zero
+            || _configuration.Calibration.Live.Enabled
+            || !HotkeyDefinition.TryParse(_configuration.Calibration.ToggleHotkey, out var hotkey))
+        {
+            return;
+        }
+
+        _calibrationHotkeyRegistered = NativeMethods.RegisterHotKey(
+            _handle,
+            CalibrationHotKeyId,
+            hotkey.Modifiers | NativeMethods.MOD_NOREPEAT,
+            hotkey.VirtualKey);
+    }
+
+    private void UnregisterCalibrationHotkey()
+    {
+        if (_calibrationHotkeyRegistered)
+        {
+            NativeMethods.UnregisterHotKey(_handle, CalibrationHotKeyId);
+            _calibrationHotkeyRegistered = false;
         }
     }
 

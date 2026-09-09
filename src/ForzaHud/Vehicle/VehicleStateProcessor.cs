@@ -52,10 +52,13 @@ public sealed class VehicleStateProcessor
             Path.Combine(
                 AppContext.BaseDirectory,
                 configuration.Calibration.DataFile),
+            carOrdinalNamesFilePath: Path.Combine(
+                AppContext.BaseDirectory,
+                configuration.Calibration.CarOrdinalNamesFile),
             rawSamplesDirectory: Path.Combine(
                 AppContext.BaseDirectory,
                 configuration.Calibration.RawSamplesDirectory));
-        _calibrationOutput = configuration.Calibration.VerboseOutput ? calibrationOutput : null;
+        _calibrationOutput = calibrationOutput;
     }
 
     /// <summary>Learned powerband state for the current car.</summary>
@@ -85,6 +88,10 @@ public sealed class VehicleStateProcessor
             }
         }
     }
+
+    /// <summary>Refreshes processor settings after a validated live configuration reload.</summary>
+    internal void ApplyConfiguration() =>
+        _powerband.ApplyConfiguration(_configuration.Telemetry.Powerband);
 
     /// <summary>Toggles calibration mode and saves a valid completed record.</summary>
     public CalibrationToggleResult ToggleCalibrationRecording()
@@ -793,7 +800,13 @@ public sealed class VehicleStateProcessor
                         $"{pair.Key}->{pair.Key + 1}="
                         + pair.Value.Average().ToString("0.###", CultureInfo.InvariantCulture)));
 
-    private void LogCalibration(string message) => _calibrationOutput?.Invoke($"[RPM calibration] {message}");
+    private void LogCalibration(string message)
+    {
+        if (_configuration.Calibration.VerboseOutput)
+        {
+            _calibrationOutput?.Invoke($"[RPM calibration] {message}");
+        }
+    }
 
     private static bool IsUsableVehicleFrame(TelemetrySnapshot snapshot) =>
         snapshot.IsRaceOn

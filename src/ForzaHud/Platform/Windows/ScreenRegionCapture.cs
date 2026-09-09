@@ -10,7 +10,7 @@ namespace ForzaHud.Platform.Windows;
 /// </summary>
 internal sealed class ScreenRegionCapture : IDisposable
 {
-    private readonly int _monitorIndex;
+    private int _monitorIndex;
     private readonly FrameTcsSettings _settings;
 
     private IntPtr _memoryDeviceContext;
@@ -65,6 +65,8 @@ internal sealed class ScreenRegionCapture : IDisposable
             _ = NativeMethods.ReleaseDC(IntPtr.Zero, screenDeviceContext);
         }
     }
+
+    public void SetMonitor(int monitorIndex) => _monitorIndex = monitorIndex;
 
     public void Dispose() => ReleaseSurface();
 

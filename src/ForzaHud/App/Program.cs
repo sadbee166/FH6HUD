@@ -63,7 +63,8 @@ public static class Program
         using (var source = CreateSource(options, load.Configuration))
         using (var application = new HudApplication(
             load.Configuration, source, factory, textFactory,
-            enableRecording: options.Record || load.Configuration.Recording.Enabled))
+            enableRecording: options.Record || load.Configuration.Recording.Enabled,
+            configPath: options.ConfigPath))
         {
             if (options.Probe)
             {
@@ -157,6 +158,7 @@ public static class Program
 
         while (!Console.KeyAvailable || Console.ReadKey(intercept: true).Key != ConsoleKey.Q)
         {
+            application.ApplyPendingConfiguration();
             var state = application.State;
 
             Console.Write("\r                                                            \r");

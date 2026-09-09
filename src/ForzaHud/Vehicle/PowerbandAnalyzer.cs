@@ -8,7 +8,7 @@ namespace ForzaHud.Vehicle;
 /// </summary>
 public sealed class PowerbandAnalyzer
 {
-    private readonly int _binCount;
+    private int _binCount;
 
     private VehicleIdentity _identity;
     private bool _hasIdentity;
@@ -28,6 +28,24 @@ public sealed class PowerbandAnalyzer
 
     /// <summary>Current display state derived from persisted calibration.</summary>
     public PowerbandState State => _state;
+
+    /// <summary>Applies a new curve resolution without discarding the current calibration.</summary>
+    public void ApplyConfiguration(PowerbandSettings settings)
+    {
+        var binCount = Math.Clamp(settings.BinCount, 8, 256);
+        if (binCount == _binCount)
+        {
+            return;
+        }
+
+        var calibration = _appliedCalibration;
+        _binCount = binCount;
+        ClearCalibration();
+        if (calibration is not null)
+        {
+            ApplyCalibration(calibration, settings);
+        }
+    }
 
     /// <summary>Updates the current vehicle identity and gear without learning live power data.</summary>
     public void UpdateVehicle(TelemetrySnapshot snapshot)

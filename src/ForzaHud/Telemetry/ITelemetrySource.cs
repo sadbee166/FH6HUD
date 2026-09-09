@@ -1,3 +1,5 @@
+using ForzaHud.Configuration;
+
 namespace ForzaHud.Telemetry;
 
 /// <summary>
@@ -23,4 +25,10 @@ public interface ITelemetrySource : IDisposable
 #pragma warning disable CA1716 // Start/Stop is the intended API pair here.
     void Stop();
 #pragma warning restore CA1716
+}
+
+/// <summary>Optional capability for telemetry sources whose endpoint can change at runtime.</summary>
+public interface IReconfigurableTelemetrySource
+{
+    void ApplyConfiguration(UdpSettings settings);
 }

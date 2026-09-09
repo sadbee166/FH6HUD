@@ -17,6 +17,7 @@ public sealed class LiveCalibrationTests
             {
               "calibration": {
                 "dataFile": "shared.json",
+                "carOrdinalNamesFile": "car-names.json",
                 "live": {
                   "enabled": true,
                   "allowOverwrite": true,
@@ -42,6 +43,7 @@ public sealed class LiveCalibrationTests
             Assert.Equal(0.5f, result.Configuration.Calibration.Live.PowerCurve.StopRpmCoverageFraction);
             Assert.Equal(3, result.Configuration.Calibration.Live.GearShift.MinimumSamplesPerGear);
             Assert.Equal("shared.json", result.Configuration.Calibration.DataFile);
+            Assert.Equal("car-names.json", result.Configuration.Calibration.CarOrdinalNamesFile);
         }
         finally
         {

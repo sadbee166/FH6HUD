@@ -37,6 +37,9 @@ public static class ConfigurationLoader
     {
         /// <summary>True when no problems were found.</summary>
         public bool IsClean => Diagnostics.Count == 0;
+
+        /// <summary>Whether this result may replace an already running configuration.</summary>
+        public bool CanApply { get; init; } = true;
     }
 
     /// <summary>
@@ -110,19 +113,19 @@ public static class ConfigurationLoader
         {
             diagnostics.Add($"Configuration file '{path}' is not valid JSON: {exception.Message}");
             diagnostics.Add("Falling back to built-in defaults.");
-            return new Result(new HudConfiguration(), null, diagnostics);
+            return new Result(new HudConfiguration(), null, diagnostics) { CanApply = false };
         }
         catch (IOException exception)
         {
             diagnostics.Add($"Configuration file '{path}' could not be read: {exception.Message}");
             diagnostics.Add("Falling back to built-in defaults.");
-            return new Result(new HudConfiguration(), null, diagnostics);
+            return new Result(new HudConfiguration(), null, diagnostics) { CanApply = false };
         }
         catch (UnauthorizedAccessException exception)
         {
             diagnostics.Add($"Configuration file '{path}' could not be read: {exception.Message}");
             diagnostics.Add("Falling back to built-in defaults.");
-            return new Result(new HudConfiguration(), null, diagnostics);
+            return new Result(new HudConfiguration(), null, diagnostics) { CanApply = false };
         }
     }
 
@@ -223,6 +226,12 @@ public static class ConfigurationLoader
         {
             diagnostics.Add("calibration.rawSamplesDirectory must not be empty; falling back to forzahud-calibration-raw.");
             configuration.Calibration.RawSamplesDirectory = "forzahud-calibration-raw";
+        }
+
+        if (string.IsNullOrWhiteSpace(configuration.Calibration.CarOrdinalNamesFile))
+        {
+            diagnostics.Add("calibration.carOrdinalNamesFile must not be empty; falling back to Forza Horizon 6 Car Ordinals.json.");
+            configuration.Calibration.CarOrdinalNamesFile = "Forza Horizon 6 Car Ordinals.json";
         }
 
         if (string.IsNullOrWhiteSpace(configuration.Calibration.ToggleHotkey))

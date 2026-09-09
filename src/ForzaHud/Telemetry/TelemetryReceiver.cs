@@ -30,6 +30,10 @@ public sealed class TelemetryReceiver : IDisposable
         _port = port;
     }
 
+    public IPAddress BindAddress => _bindAddress;
+
+    public int Port => _port;
+
     /// <summary>Raised for each received datagram. The buffer is reused after the handler returns.</summary>
     public event TelemetryPacketHandler? PacketReceived;
 

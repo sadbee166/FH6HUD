@@ -35,6 +35,49 @@ public sealed class HudConfiguration
     /// </summary>
     public ElementSettings Element(string id) =>
         Elements.TryGetValue(id, out var settings) ? settings : DefaultElements.Create()[id];
+
+    /// <summary>
+    /// Applies another validated configuration while preserving this object's nested
+    /// settings instances. Runtime analyzers and render contexts can therefore continue to
+    /// use their captured settings references after a live reload.
+    /// </summary>
+    internal void ApplyFrom(HudConfiguration source)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+        CopySettings(this, source);
+    }
+
+    private static void CopySettings(object target, object source)
+    {
+        if (ReferenceEquals(target, source))
+        {
+            return;
+        }
+
+        foreach (var property in target.GetType().GetProperties(
+                     System.Reflection.BindingFlags.Instance
+                     | System.Reflection.BindingFlags.Public))
+        {
+            if (!property.CanRead || !property.CanWrite)
+            {
+                continue;
+            }
+
+            var incoming = property.GetValue(source);
+            var current = property.GetValue(target);
+            if (property.PropertyType.IsClass
+                && property.PropertyType != typeof(string)
+                && !typeof(System.Collections.IDictionary).IsAssignableFrom(property.PropertyType)
+                && current is not null
+                && incoming is not null)
+            {
+                CopySettings(current, incoming);
+                continue;
+            }
+
+            property.SetValue(target, incoming);
+        }
+    }
 }
 
 public sealed class UdpSettings
@@ -688,6 +731,9 @@ public sealed class CalibrationSettings
 
     /// <summary>Directory for compressed raw power samples, resolved relative to the application directory.</summary>
     public string RawSamplesDirectory { get; set; } = "forzahud-calibration-raw";
+
+    /// <summary>Car ordinal name catalog file, resolved relative to the application directory.</summary>
+    public string CarOrdinalNamesFile { get; set; } = "Forza Horizon 6 Car Ordinals.json";
 
     /// <summary>Global hotkey used to toggle calibration recording.</summary>
     public string ToggleHotkey { get; set; } = "Ctrl+Alt+R";

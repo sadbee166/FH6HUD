@@ -30,3 +30,5 @@ forzahud-calibration*.json
 .snapshots/
 scratch-replay-analysis/
 presentmon.exe
+TCS_OFF.png
+TCS_ON.png

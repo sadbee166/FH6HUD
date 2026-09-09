@@ -1,31 +1,31 @@
-{
-  // ForzaHud configuration.
+{ 
+  // ForzaHud 配置。
   //
-  // Copy this file next to ForzaHud.exe (or into the working directory) and edit it.
-  // Anything omitted here falls back to the built-in default, and unreadable JSON is
-  // reported in forzahud.log and then ignored.
+  // 将此文件复制到 ForzaHud.exe 旁边（或工作目录中）并进行编辑。
+  // 此处省略的任何配置都会回退到内置默认值；无法读取的 JSON
+  // 会记录到 forzahud.log，然后忽略。
   //
-  // Comments are allowed: they are stripped before parsing.
+  // 允许使用注释：解析前会将其移除。
 
   "udp": {
-    // Must match SETTINGS > HUD AND GAMEPLAY > Data Out IP Port in FH6.
-    // Do not use 5200-5300: the game binds its own outgoing socket there.
-    // Use "127.0.0.1" when the HUD runs on the same PC as the game,
-    // or "0.0.0.0" to accept telemetry from another machine or a console.
+    // 必须与 FH6 中 SETTINGS > HUD AND GAMEPLAY > Data Out IP Port 的设置一致。
+    // 不要使用 5200-5300：游戏会在该范围内绑定自己的出站套接字。
+    // HUD 与游戏运行在同一台电脑时使用 "127.0.0.1"，
+    // 或使用 "0.0.0.0" 接收来自另一台电脑或主机的遥测数据。
     "bindAddress": "127.0.0.1",
     "port": 2247
   },
 
   "units": {
-    // "KilometersPerHour" or "MilesPerHour"
+    // "KilometersPerHour" 或 "MilesPerHour"
     "speed": "KilometersPerHour"
   },
 
   "overlay": {
-    // 0 is the primary display.
+    // 0 表示主显示器。
     "monitor": 0,
     "opacity": 1.0,
-    // Hide the HUD when FH6 reports that the player is not actively driving.
+    // 当 FH6 报告玩家当前未驾驶时隐藏 HUD。
     "hideWhenNotDriving": true,
     "targetFramesPerSecond": 120
   },
@@ -41,18 +41,18 @@
       "primarySize": 58
     },
 
-    // Reticle radius as a fraction of the smaller screen dimension.
+    // 瞄准环半径占屏幕较短边的比例。
     "reticleRadius": 0.3,
     "reticleLevelMarkerLength": 0.15,
     "spacing": 12,
 
-    // G-force response for the complete panel. Positive longitudinal G is acceleration:
-    // the panel shrinks and moves down. Negative longitudinal G moves it up and enlarges it.
-    // Positive lateral G moves it right. Movement values are fractions of the shorter screen
-    // dimension per G. Sensitivities are signed; negative values reverse their response.
+    // 整个面板的 G 力响应。正向纵向 G 表示加速：
+    // 面板会缩小并下移。负向纵向 G 会使面板上移并放大。
+    // 正向横向 G 会使面板右移。移动值表示每 1G 占屏幕较短边的比例。
+    // 灵敏度带有正负号；负值会反转响应方向。
     "panelMotion": {
       "enabled": true,
-      // Time constant in milliseconds. 0 disables motion smoothing.
+      // 以毫秒为单位的时间常数。0 表示禁用运动平滑。
       "smoothingMilliseconds": 200,
       "scalePerLongitudinalG": -0.1,
       "scalePer100Kph": 0.05,
@@ -60,12 +60,12 @@
       "verticalMovePerVerticalG": -0.025,
       "horizontalMovePerLateralG": -0.033,
       "rollMultiplier": -1,
-      // Normalized screen-space pivot coordinates: 0 is left/top, 1 is right/bottom.
-      // Yaw rotates around the vertical line at yawPivotX; pitch rotates around the
-      // horizontal line at pitchPivotY, both into the depth axis of the screen.
+      // 归一化屏幕空间枢轴坐标：0 为左侧/顶部，1 为右侧/底部。
+      // 偏航围绕 yawPivotX 指定的竖线旋转；俯仰围绕
+      // pitchPivotY 指定的横线旋转；二者都会沿屏幕深度轴产生旋转。
       "yawPivotX": 0.5,
       "pitchPivotY": 0.5,
-      // Depth rotation response. Angular acceleration is in radians per second squared.
+      // 深度旋转响应。角加速度单位为弧度/秒²。
       "yawDegreesPerAngularAcceleration": 5,
       "pitchDegreesPerAngularAcceleration": 2.5,
       "maximumYawRotationDegrees": 360.0,
@@ -82,16 +82,16 @@
       "maximumScale": 32767
     },
 
-    // Arc meters. arcLength is in degrees, width is in device-independent pixels, and
-    // startValue is in each meter's native unit: RPM, PSI, or 0..1. Steer is signed around
-    // neutral and does not use startValue.
-    // labelOffsetX/Y move only that meter's label and value in device-independent pixels;
-    // both offsets are scaled with the meter and may be negative.
-    // A null color keeps the semantic theme colours, including RPM powerband highlighting.
+    // 弧形仪表。arcLength 单位为度，width 单位为设备无关像素，且
+    // startValue 使用每个仪表的原生单位：RPM、PSI 或 0..1。转向以中立点为中心带正负号，
+    // 不使用 startValue。
+    // labelOffsetX/Y 仅移动该仪表的标签和值，单位为设备无关像素；
+    // 两个偏移量会随仪表缩放，也可以为负数。
+    // color 为 null 时保留语义主题颜色，包括 RPM 功率带高亮。
     "meters": {
       "steer":    { "arcLength": 75, "width": 3.2, "color": null, "startValue": 0 },
-      // Lower the calculated peak-power/shift RPM markers on the display without changing
-      // the telemetry-derived values. 5 means 5 percent lower; 0 preserves the raw values.
+      // 在不改变遥测计算值的情况下，降低显示中的峰值功率/换挡 RPM 标记。
+      // 5 表示降低 5%；0 保留原始值。
       "rpm":      { "arcLength": 90, "width": 3.2, "color": null, "startValue": 0, "yellowZoneOffsetPercent": 0, "redZoneOffsetPercent": 0 },
       "boost":    { "arcLength": 90, "width": 3.2, "color": null, "startValue": 0, "labelOffsetX": 12, "labelOffsetY": -24 },
       "brake":    { "arcLength": 90, "width": 3.2, "color": null, "startValue": 0, "labelOffsetX": 12, "labelOffsetY": 0 },
@@ -100,14 +100,14 @@
 
     "theme": {
       "primary":  { "r": 255, "g": 255, "b": 255, "a": 255 },
-      "dim":      { "r": 255, "g": 255, "b": 255, "a": 255 }, // { "r": 78, "g": 97, "b": 105, "a": 255 }
+      "dim":      { "r": 255, "g": 255, "b": 255, "a": 255 }, // 备用颜色示例：{ "r": 78, "g": 97, "b": 105, "a": 255 }
       "accent":   { "r": 95,  "g": 208, "b": 255, "a": 255 },
       "warning":  { "r": 255, "g": 179, "b": 39,  "a": 255 },
       "critical": { "r": 255, "g": 77,  "b": 77,  "a": 255 }
     },
 
-    // Secondary paint opacity multipliers. These are applied on top of the overlay and
-    // per-element opacity values. Set a value to 1 for fully opaque detail geometry.
+    // 次级绘制不透明度乘数。这些值会叠加应用于 overlay 和
+    // 每个元素的不透明度。将某个值设为 1，可让细节几何图形完全不透明。
     "opacity": {
       "arcTrack": 0.5,
       "arcMarker": 0.85,
@@ -124,8 +124,8 @@
       "noTelemetryLabel": 0.85
     },
 
-    // Smoothing time constants in milliseconds. 0 means none.
-    // Driver inputs are 0 on purpose: the HUD must feel immediate.
+    // 以毫秒为单位的平滑时间常数。0 表示不平滑。
+    // 驾驶员输入特意设为 0：HUD 必须即时响应。
     "smoothing": {
       "rpmMilliseconds": 50,
       "pedalMilliseconds": 0,
@@ -137,21 +137,20 @@
 
   "telemetry": {
     "gForce": {
-      // FH6 documents car-local axes as X = right, Y = up, Z = forward, but the sign of
-      // the reported values must be confirmed against a recording before it is trusted.
-      // Record a straight-line pull and a steady left-hander, replay it, and flip whichever
-      // axis reads backwards.
+      // FH6 将车辆本地坐标轴定义为 X = 右、Y = 上、Z = 前，但报告值的符号
+      // 必须先通过录制确认，确认后才能信任。
+      // 录制一次直线加速和一次稳定左弯，回放后将读数方向相反的轴翻转。
       "invertLateral": false,
       "invertLongitudinal": true,
       "invertVertical": false,
 
-      // Acceleration that maps to the edge of the G indicator. The 1G ring is drawn inside it.
+      // 映射到 G 指示器边缘的加速度。1G 环线绘制在其内部。
       "fullScaleG": 1.5
     },
 
     "grip": {
-      // FH6 reports normalized slip: 0 is full grip, |value| > 1 is loss of grip.
-      // These are slip thresholds, not "percentage grip".
+      // FH6 报告归一化滑移：0 表示完全抓地，|value| > 1 表示失去抓地。
+      // 这些是滑移阈值，不是“抓地力百分比”。
       "slipLossThreshold": 1.0,
       "slipApproachThreshold": 0.65,
       "lateralSlipThreshold": 0.85,
@@ -161,12 +160,12 @@
     },
 
     "tractionControl": {
-      // "Telemetry" infers TCS from telemetry evidence. "Frame" reads the game's TCR
-      // indicator directly from the selected monitor and disables telemetry TCS detection.
+      /* 改TCS改力竭了(ノ｀Д)ノ*/
       "enabled": true,
       "detectionMode": "Frame",
-      // Region defaults are based on the supplied 2560x1440 TCS_ON/TCS_OFF frames.
+      // 区域默认值基于随附的 2560x1440 TCS_ON/TCS_OFF 帧。
       "frame": {
+        "showDetectionZone": false,
         "regionX": 0.950,
         "regionY": 0.925,
         "regionWidth": 0.025,
@@ -178,7 +177,7 @@
       "enginePowerEvidenceEnabled": false,
       "minimumThrottle": 0.25,
       "maximumThrottleDecrease": 0.05,
-      // Same-gear RPM drop treated as a transmission/shift transient and suppressed.
+      // 将同挡位 RPM 降低视为变速箱/换挡瞬态并抑制。
       "minimumShiftRpmDrop": 250,
       "repeatedCutWindowSamples": 4,
       "minimumRepeatedCuts": 4,
@@ -208,7 +207,7 @@
         "interventionHoldMilliseconds": 120,
         "recoveryMilliseconds": 160
       },
-      // Sustained driven-tyre slip evidence, tuned per drivetrain from recorded sessions.
+      // 持续的驱动轮滑移证据；根据录制的会话按驱动形式调校。
       "tireSlip": {
         "enabled": true,
         "fwdMinimumDrivenSlip": 0.02,
@@ -222,9 +221,9 @@
     },
 
     "powerband": {
-      // The useful powerband is derived from the persisted power curve; FH6 does not transmit it.
+      // 有效功率带根据已保存的功率曲线推导；FH6 不会传输该数据。
       "binCount": 256,
-      // Short power deficits followed by recovery are removed from the in-memory raw samples.
+      // 从内存中的原始样本中移除短暂的功率下降及其后的恢复段。
       "shapeCleaningEnabled": true,
       "powerCurveDipFraction": 0.04,
       "minimumThrottle": 0.99,
@@ -245,20 +244,20 @@
       "maximumRpmRate": 20000,
       "maximumRpmDrop": 50,
       "rpmRateChangeFraction": 0.35,
-      // Engine power at or above this fraction of peak defines the main power band.
+      // 达到峰值功率该比例或更高的发动机功率定义主要功率带。
       "powerbandFraction": 0.95,
       "effectiveRedlinePercentile": 0.99,
-      // Highest-RPM sample fraction excluded from peak-power selection.
+      // 选择峰值功率时排除的最高 RPM 样本比例。
       "peakPowerTopPercentile": 0.025,
-      // Highest-RPM sample fraction excluded from powerband bounds.
+      // 确定功率带边界时排除的最高 RPM 样本比例。
       "powerbandTopPercentile": 0.025,
-      // Highest-RPM samples used to calculate the maximum practical RPM.
+      // 用于计算最高实用 RPM 的最高 RPM 样本比例。
       "practicalRedlineTopPercentile": 0.3,
-      // Candidate spacing for the practical time-to-speed shift optimizer.
+      // 实用加速换挡优化器的候选 RPM 间隔。
       "shiftOptimizationCandidateStepRpm": 25,
-      // Minimum retained speed-acceleration samples per gear before using measured timing.
+      // 使用实测计时前，每个挡位所需保留的最少速度-加速度样本数。
       "minimumShiftOptimizationSamplesPerGear": 8,
-      // Speed intervals used to integrate predicted time across a shift.
+      // 用于积分计算换挡过程中预测时间的速度区间数。
       "shiftOptimizationSpeedIntegrationSteps": 48
     }
   },
@@ -269,11 +268,12 @@
   },
 
   "calibration": {
-    // Ctrl+Alt+R starts and ends a fresh straight-line calibration run.
+    // Ctrl+Alt+R 开始和结束一次全新的直线校准。
     "dataFile": "forzahud-calibration.json",
     "rawSamplesDirectory": "forzahud-calibration-raw",
+    "carOrdinalNamesFile": "car_ordinals.json",
     "toggleHotkey": "Ctrl+Alt+R",
-    // Set false to disable calibration progress and result messages in the terminal.
+    // 设置为 false 可禁用终端中的校准进度和结果消息。
     "verboseOutput": true,
     "live": {
       "enabled": true,
@@ -290,14 +290,13 @@
     }
   },
 
-  // Element placement. x and y are normalized: (0,0) is the top-left of the overlay,
-  // (1,1) the bottom-right. scale multiplies the element's own geometry, opacity is an
-  // additional multiplier on top of overlay.opacity.
+  // 元素布局。x 和 y 经过归一化：(0,0) 是覆盖层左上角，
+  // (1,1) 是右下角。scale 乘以元素自身的几何尺寸，opacity 是叠加在
+  // overlay.opacity 之上的额外乘数。
   //
-  // The default layout follows the reticle arrangement in AGENTS.md:
-  //   steer on the top arc, RPM on the left arc, and boost/brake/throttle nested on the
-  //   right arcs from inner to outer; gear and speed sit across the middle, with G-force
-  //   and tyre grip below.
+  // 默认布局遵循 AGENTS.md 中的瞄准环排列：
+  //   转向位于顶部弧线，RPM 位于左侧弧线，增压/刹车/油门从内到外嵌套在
+  //   右侧弧线；挡位和速度横跨中部，G 力和轮胎抓地力位于下方。
   "elements": {
     "reticle": { "enabled": true, "x": 0.50, "y": 0.50, "scale": 1.0, "opacity": 1 },
     "steer":   { "enabled": true, "x": 0.50, "y": 0.50, "scale": 1.0, "opacity": 1 },

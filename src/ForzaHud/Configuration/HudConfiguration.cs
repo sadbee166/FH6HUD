@@ -473,32 +473,59 @@ public enum TcsDetectionMode
     Frame,
 }
 
-/// <summary>Settings for reading the in-game TCR indicator from a captured screen region.</summary>
+/// <summary>Settings for finding the in-game TCR shape inside a captured speedometer region.</summary>
 public sealed class FrameTcsSettings
 {
-    /// <summary>Whether to draw the configured detection region on the HUD for calibration.</summary>
+    /// <summary>Whether to draw the configured speedometer search region on the HUD for calibration.</summary>
     public bool ShowDetectionZone { get; set; }
 
-    /// <summary>Left edge of the indicator region as a fraction of the selected monitor.</summary>
-    public float RegionX { get; set; } = 0.950f;
+    /// <summary>Left edge of the speedometer search region as a fraction of the selected monitor.</summary>
+    public float RegionX { get; set; } = 0.790f;
 
-    /// <summary>Top edge of the indicator region as a fraction of the selected monitor.</summary>
-    public float RegionY { get; set; } = 0.925f;
+    /// <summary>Top edge of the speedometer search region as a fraction of the selected monitor.</summary>
+    public float RegionY { get; set; } = 0.820f;
 
-    /// <summary>Width of the indicator region as a fraction of the selected monitor.</summary>
-    public float RegionWidth { get; set; } = 0.025f;
+    /// <summary>Width of the speedometer search region as a fraction of the selected monitor.</summary>
+    public float RegionWidth { get; set; } = 0.200f;
 
-    /// <summary>Height of the indicator region as a fraction of the selected monitor.</summary>
-    public float RegionHeight { get; set; } = 0.020f;
+    /// <summary>Height of the speedometer search region as a fraction of the selected monitor.</summary>
+    public float RegionHeight { get; set; } = 0.140f;
 
-    /// <summary>Minimum number of cyan pixels required to classify the indicator as on.</summary>
+    /// <summary>Minimum number of cyan pixels required in a candidate shape window.</summary>
     public int MinimumOnPixels { get; set; } = 20;
 
-    /// <summary>Minimum green and blue channel value for a cyan indicator pixel.</summary>
+    /// <summary>Minimum green and blue channel value for a cyan TCR pixel.</summary>
     public int MinimumCyanChannel { get; set; } = 120;
 
     /// <summary>Minimum amount by which green and blue must each exceed red.</summary>
     public int MinimumCyanDominance { get; set; } = 50;
+
+    /// <summary>
+    /// TCR template rows separated by '/'. '#' is expected cyan and '.' is expected background.
+    /// </summary>
+    public string Template { get; set; } =
+        "#####..####.####./..#...#.....#...#/..#...#.....#...#/..#...#.....####./..#...#.....#.#../..#...#.....#..#./..#....####.#...#";
+
+    /// <summary>Template width as a fraction of the captured speedometer region.</summary>
+    public float TemplateWidthFraction { get; set; } = 0.090f;
+
+    /// <summary>Template height as a fraction of the captured speedometer region.</summary>
+    public float TemplateHeightFraction { get; set; } = 0.080f;
+
+    /// <summary>Minimum cyan coverage for a template foreground cell.</summary>
+    public float MinimumForegroundCellCoverage { get; set; } = 0.20f;
+
+    /// <summary>Maximum cyan coverage allowed for a template background cell.</summary>
+    public float MaximumBackgroundCellCoverage { get; set; } = 0.15f;
+
+    /// <summary>Minimum fraction of foreground template cells that must match.</summary>
+    public float MinimumForegroundMatch { get; set; } = 0.70f;
+
+    /// <summary>Minimum weighted foreground/background shape score.</summary>
+    public float MinimumShapeMatch { get; set; } = 0.74f;
+
+    /// <summary>Pixel step between candidate template positions.</summary>
+    public int SearchStepPixels { get; set; } = 1;
 }
 
 /// <summary>Thresholds and hysteresis for sustained driven-tyre slip evidence.</summary>

@@ -124,10 +124,10 @@ public sealed class HudRendererTests
             hasTelemetry: false);
 
         var rect = Assert.Single(context.Rectangles);
-        Assert.Equal(1824f, rect.X);
-        Assert.Equal(999f, rect.Y);
-        Assert.Equal(48f, rect.Width);
-        Assert.Equal(21.6f, rect.Height, precision: 3);
+        Assert.Equal(1516.8f, rect.X);
+        Assert.Equal(885.6f, rect.Y);
+        Assert.Equal(384f, rect.Width);
+        Assert.Equal(151.2f, rect.Height, precision: 3);
 
         configuration.Telemetry.TractionControl.DetectionMode = TcsDetectionMode.Telemetry;
         context = new RecordingRenderContext();

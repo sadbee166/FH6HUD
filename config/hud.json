@@ -65,7 +65,7 @@
       // pitchPivotY 指定的横线旋转；二者都会沿屏幕深度轴产生旋转。
       "yawPivotX": 0.5,
       "pitchPivotY": 0.5,
-      // 深度旋转响应。角速度单位为弧度/秒。
+      // 旋转响应。角速度单位为弧度/秒。
       "yawDegreesPerAngularVelocity": 20,
       "pitchDegreesPerAngularVelocity": 20,
       "maximumYawRotationDegrees": 360.0,
@@ -160,19 +160,28 @@
     },
 
     "tractionControl": {
-      /* 改TCS改力竭了(ノ｀Д)ノ*/
+      /* 修TCS修力竭了(ノ｀Д)ノ不要使用Telemetry模式 */
       "enabled": true,
       "detectionMode": "Frame",
-      // 区域默认值基于随附的 2560x1440 TCS_ON/TCS_OFF 帧。
+      // 搜索区默认值覆盖随附的 2560x1440 TCS_ON/TCS_OFF 帧中的整个速度表。
       "frame": {
         "showDetectionZone": false,
-        "regionX": 0.950,
-        "regionY": 0.925,
-        "regionWidth": 0.025,
-        "regionHeight": 0.020,
+        "regionX": 0.790,
+        "regionY": 0.820,
+        "regionWidth": 0.200,
+        "regionHeight": 0.140,
         "minimumOnPixels": 20,
         "minimumCyanChannel": 120,
-        "minimumCyanDominance": 50
+        "minimumCyanDominance": 50,
+        // '#' 表示 TCR 的青色像素，'.' 表示背景；每行用 '/' 分隔。
+        "template": "#####..####.####./..#...#.....#...#/..#...#.....#...#/..#...#.....####./..#...#.....#.#../..#...#.....#..#./..#....####.#...#",
+        "templateWidthFraction": 0.090,
+        "templateHeightFraction": 0.080,
+        "minimumForegroundCellCoverage": 0.20,
+        "maximumBackgroundCellCoverage": 0.15,
+        "minimumForegroundMatch": 0.70,
+        "minimumShapeMatch": 0.74,
+        "searchStepPixels": 1
       },
       "enginePowerEvidenceEnabled": false,
       "minimumThrottle": 0.25,

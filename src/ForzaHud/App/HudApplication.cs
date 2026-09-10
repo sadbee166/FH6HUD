@@ -159,9 +159,9 @@ public sealed class HudApplication : IDisposable
 
             if (_frameTcs is not null && _frameCapture is not null)
             {
-                if (_frameCapture.TryCapture(out var frame))
+                if (_frameCapture.TryCapture(out var frame, out var width, out var height))
                 {
-                    var frameTcsActive = _frameTcs.Update(frame.Span);
+                    var frameTcsActive = _frameTcs.Update(frame.Span, width, height);
                     Volatile.Write(ref _frameTcsActive, frameTcsActive ? 1 : 0);
                     state.TractionControlActive = frameTcsActive;
                 }

@@ -9,25 +9,25 @@ namespace ForzaHud.Tests;
 public sealed class FrameTcsAnalyzerTests
 {
     [Fact]
-    public void CyanIndicatorPixelsActivateTheDetector()
+    public void CyanTcrShapeActivatesTheDetector()
     {
         var analyzer = new FrameTcsAnalyzer(new FrameTcsSettings
         {
+            Template = "##./#../###",
+            TemplateWidthFraction = 0.20f,
+            TemplateHeightFraction = 0.30f,
             MinimumOnPixels = 2,
             MinimumCyanChannel = 120,
             MinimumCyanDominance = 50,
         });
 
-        var pixels = new byte[]
-        {
-            245, 226, 37, 0,
-            218, 199, 46, 0,
-            80, 100, 100, 0,
-        };
+        var pixels = new byte[20 * 10 * 4];
+        PaintCyan(pixels, 20, 12, 5, "##./#../###");
 
-        Assert.True(analyzer.Update(pixels));
+        Assert.True(analyzer.Update(pixels, 20, 10));
         Assert.True(analyzer.IsActive);
-        Assert.Equal(2, analyzer.LastOnPixelCount);
+        Assert.Equal(6, analyzer.LastOnPixelCount);
+        Assert.True(analyzer.LastShapeMatch >= 0.78f);
     }
 
     [Fact]
@@ -46,20 +46,59 @@ public sealed class FrameTcsAnalyzerTests
             90, 95, 100, 0,
         };
 
-        Assert.False(analyzer.Update(pixels));
+        Assert.False(analyzer.Update(pixels, 2, 1));
         Assert.False(analyzer.IsActive);
         Assert.Equal(0, analyzer.LastOnPixelCount);
     }
 
     [Fact]
-    public void DefaultCaptureRegionExcludesTheUpperAbsIndicatorBand()
+    public void DefaultCaptureRegionCoversTheSpeedometerSearchArea()
     {
         var region = ScreenRegionCapture.CalculateRegion(
             new MonitorHelper.MonitorBounds(0, 0, 2560, 1440, true),
             new FrameTcsSettings());
 
-        Assert.True(region.Y >= 1330);
-        Assert.True(region.Y + region.Height <= 1365);
+        Assert.Equal(2022, region.X);
+        Assert.Equal(1181, region.Y);
+        Assert.Equal(512, region.Width);
+        Assert.Equal(202, region.Height);
+    }
+
+    [Fact]
+    public void CyanPixelsWithoutTheTcrShapeRemainOff()
+    {
+        var analyzer = new FrameTcsAnalyzer(new FrameTcsSettings
+        {
+            Template = "##./#../###",
+            TemplateWidthFraction = 0.20f,
+            TemplateHeightFraction = 0.30f,
+            MinimumOnPixels = 2,
+            MinimumForegroundMatch = 0.90f,
+            MinimumShapeMatch = 0.90f,
+        });
+
+        var pixels = new byte[20 * 10 * 4];
+        PaintCyan(pixels, 20, 12, 5, "###/###/###");
+
+        Assert.False(analyzer.Update(pixels, 20, 10));
+        Assert.False(analyzer.IsActive);
+    }
+
+    [Fact]
+    public void CyanAbsShapeDoesNotActivateTheDetector()
+    {
+        var settings = new FrameTcsSettings();
+        var analyzer = new FrameTcsAnalyzer(settings);
+        var pixels = new byte[512 * 202 * 4];
+        var a = new[] { ".###.", "#...#", "#...#", "#####", "#...#", "#...#", "#...#" };
+        var b = new[] { "####.", "#...#", "#...#", "####.", "#...#", "#...#", "####." };
+        var s = new[] { ".####", "#....", "#....", ".###.", "....#", "....#", "####." };
+        var abs = a.Select((row, index) => row + "." + b[index] + "." + s[index]).ToArray();
+
+        PaintScaledCyan(pixels, 512, 300, 120, settings, abs);
+
+        Assert.False(analyzer.Update(pixels, 512, 202));
+        Assert.True(analyzer.LastOnPixelCount > 0);
     }
 
     [Fact]
@@ -161,4 +200,64 @@ public sealed class FrameTcsAnalyzerTests
             TireSlipRatioRearLeft = slip,
             TireSlipRatioRearRight = slip,
         };
+
+    private static void PaintCyan(byte[] pixels, int width, int x, int y, string template)
+    {
+        var rows = template.Split('/');
+        for (var row = 0; row < rows.Length; row++)
+        {
+            for (var column = 0; column < rows[row].Length; column++)
+            {
+                if (rows[row][column] != '#')
+                {
+                    continue;
+                }
+
+                var offset = ((y + row) * width + x + column) * 4;
+                pixels[offset] = 220;
+                pixels[offset + 1] = 220;
+                pixels[offset + 2] = 20;
+            }
+        }
+    }
+
+    private static void PaintScaledCyan(
+        byte[] pixels,
+        int width,
+        int x,
+        int y,
+        FrameTcsSettings settings,
+        IReadOnlyList<string> template)
+    {
+        var templateWidth = template[0].Length;
+        var templateHeight = template.Count;
+        var shapeWidth = Math.Max(templateWidth, (int)MathF.Round(width * settings.TemplateWidthFraction));
+        var shapeHeight = Math.Max(templateHeight, (int)MathF.Round(202 * settings.TemplateHeightFraction));
+
+        for (var row = 0; row < templateHeight; row++)
+        {
+            var top = y + row * shapeHeight / templateHeight;
+            var bottom = y + (row + 1) * shapeHeight / templateHeight;
+            for (var column = 0; column < templateWidth; column++)
+            {
+                if (template[row][column] != '#')
+                {
+                    continue;
+                }
+
+                var left = x + column * shapeWidth / templateWidth;
+                var right = x + (column + 1) * shapeWidth / templateWidth;
+                for (var pixelY = top; pixelY < bottom; pixelY++)
+                {
+                    for (var pixelX = left; pixelX < right; pixelX++)
+                    {
+                        var offset = (pixelY * width + pixelX) * 4;
+                        pixels[offset] = 220;
+                        pixels[offset + 1] = 220;
+                        pixels[offset + 2] = 20;
+                    }
+                }
+            }
+        }
+    }
 }

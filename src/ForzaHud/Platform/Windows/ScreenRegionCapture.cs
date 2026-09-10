@@ -27,9 +27,11 @@ internal sealed class ScreenRegionCapture : IDisposable
         _settings = settings;
     }
 
-    public bool TryCapture(out ReadOnlyMemory<byte> pixels)
+    public bool TryCapture(out ReadOnlyMemory<byte> pixels, out int width, out int height)
     {
         pixels = ReadOnlyMemory<byte>.Empty;
+        width = 0;
+        height = 0;
         var monitor = MonitorHelper.Get(_monitorIndex);
         var region = CalculateRegion(monitor, _settings);
         EnsureSurface(region.Width, region.Height);
@@ -58,6 +60,8 @@ internal sealed class ScreenRegionCapture : IDisposable
 
             Marshal.Copy(_bits, _pixels, 0, _pixels.Length);
             pixels = _pixels;
+            width = _width;
+            height = _height;
             return true;
         }
         finally

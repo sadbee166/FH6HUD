@@ -554,11 +554,11 @@ public static class ConfigurationLoader
             || frame.RegionX + frame.RegionWidth > 1f
             || frame.RegionY + frame.RegionHeight > 1f)
         {
-            diagnostics.Add("telemetry.tractionControl.frame region must fit within the monitor; falling back to the supplied 2560x1440 reference region.");
-            frame.RegionX = 0.950f;
-            frame.RegionY = 0.925f;
-            frame.RegionWidth = 0.025f;
-            frame.RegionHeight = 0.020f;
+            diagnostics.Add("telemetry.tractionControl.frame region must fit within the monitor; falling back to the supplied speedometer region.");
+            frame.RegionX = 0.790f;
+            frame.RegionY = 0.820f;
+            frame.RegionWidth = 0.200f;
+            frame.RegionHeight = 0.140f;
         }
 
         if (frame.MinimumOnPixels < 1)
@@ -579,6 +579,54 @@ public static class ConfigurationLoader
             frame.MinimumCyanDominance = 50;
         }
 
+        if (!IsValidTemplate(frame.Template))
+        {
+            diagnostics.Add("telemetry.tractionControl.frame.template must be a rectangular '#' and '.' shape with both foreground and background cells; falling back to the built-in TCR shape.");
+            frame.Template = new FrameTcsSettings().Template;
+        }
+
+        if (frame.TemplateWidthFraction is <= 0f or > 1f)
+        {
+            diagnostics.Add("telemetry.tractionControl.frame.templateWidthFraction must be between 0 and 1; falling back to 0.090.");
+            frame.TemplateWidthFraction = 0.090f;
+        }
+
+        if (frame.TemplateHeightFraction is <= 0f or > 1f)
+        {
+            diagnostics.Add("telemetry.tractionControl.frame.templateHeightFraction must be between 0 and 1; falling back to 0.080.");
+            frame.TemplateHeightFraction = 0.080f;
+        }
+
+        if (frame.MinimumForegroundCellCoverage is < 0f or > 1f)
+        {
+            diagnostics.Add("telemetry.tractionControl.frame.minimumForegroundCellCoverage must be between 0 and 1; falling back to 0.20.");
+            frame.MinimumForegroundCellCoverage = 0.20f;
+        }
+
+        if (frame.MaximumBackgroundCellCoverage is < 0f or > 1f)
+        {
+            diagnostics.Add("telemetry.tractionControl.frame.maximumBackgroundCellCoverage must be between 0 and 1; falling back to 0.15.");
+            frame.MaximumBackgroundCellCoverage = 0.15f;
+        }
+
+        if (frame.MinimumForegroundMatch is < 0f or > 1f)
+        {
+            diagnostics.Add("telemetry.tractionControl.frame.minimumForegroundMatch must be between 0 and 1; falling back to 0.70.");
+            frame.MinimumForegroundMatch = 0.70f;
+        }
+
+        if (frame.MinimumShapeMatch is < 0f or > 1f)
+        {
+            diagnostics.Add("telemetry.tractionControl.frame.minimumShapeMatch must be between 0 and 1; falling back to 0.74.");
+            frame.MinimumShapeMatch = 0.74f;
+        }
+
+        if (frame.SearchStepPixels < 1)
+        {
+            diagnostics.Add("telemetry.tractionControl.frame.searchStepPixels must be positive; falling back to 1.");
+            frame.SearchStepPixels = 1;
+        }
+
         if (settings.AttackMilliseconds < 0)
         {
             diagnostics.Add("telemetry.tractionControl.attackMilliseconds must be non-negative; falling back to 10.");
@@ -590,6 +638,49 @@ public static class ConfigurationLoader
             diagnostics.Add("telemetry.tractionControl.releaseMilliseconds must be non-negative; falling back to 30.");
             settings.ReleaseMilliseconds = 30;
         }
+    }
+
+    private static bool IsValidTemplate(string? template)
+    {
+        if (string.IsNullOrEmpty(template))
+        {
+            return false;
+        }
+
+        var rows = template.Split('/');
+        var width = rows[0].Length;
+        var foreground = 0;
+        var background = 0;
+        if (width == 0)
+        {
+            return false;
+        }
+
+        foreach (var row in rows)
+        {
+            if (row.Length != width)
+            {
+                return false;
+            }
+
+            foreach (var cell in row)
+            {
+                if (cell == '#')
+                {
+                    foreground++;
+                }
+                else if (cell == '.')
+                {
+                    background++;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        return foreground > 0 && background > 0;
     }
 
     private static void ValidateLiveCalibration(LiveCalibrationSettings settings, List<string> diagnostics)

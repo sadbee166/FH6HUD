@@ -67,8 +67,18 @@ public sealed class Direct2DRenderContext : ITransformableRenderContext, IDepthT
     /// <summary>Finishes the frame and presents it.</summary>
     public void EndDraw() => _target.EndDraw().CheckError();
 
-    public void DrawLine(HudPoint from, HudPoint to, HudPaint paint, float thickness) =>
-        _target.DrawLine(ToVector2(from), ToVector2(to), Brush(paint), thickness);
+    public void DrawLine(HudPoint from, HudPoint to, HudPaint paint, float thickness)
+    {
+        var brush = Brush(paint);
+        var cornerRadius = CornerRadius(thickness);
+        if (cornerRadius <= 0f)
+        {
+            _target.DrawLine(ToVector2(from), ToVector2(to), brush, thickness);
+            return;
+        }
+
+        DrawRoundedLine(from, to, brush, thickness, cornerRadius);
+    }
 
     public void DrawArc(
         HudPoint center,
@@ -80,6 +90,7 @@ public sealed class Direct2DRenderContext : ITransformableRenderContext, IDepthT
         float thickness)
     {
         var brush = Brush(paint);
+        var cornerRadius = CornerRadius(thickness);
         var steps = Math.Max(2, (int)Math.Ceiling(Math.Abs(sweepAngle) / ArcSegmentDegrees));
 
         var previous = PointOnEllipse(center, radiusX, radiusY, startAngle);
@@ -87,7 +98,15 @@ public sealed class Direct2DRenderContext : ITransformableRenderContext, IDepthT
         {
             var angle = startAngle + (sweepAngle * i / steps);
             var current = PointOnEllipse(center, radiusX, radiusY, angle);
-            _target.DrawLine(ToVector2(previous), ToVector2(current), brush, thickness);
+            if (cornerRadius <= 0f)
+            {
+                _target.DrawLine(ToVector2(previous), ToVector2(current), brush, thickness);
+            }
+            else
+            {
+                DrawRoundedLine(previous, current, brush, thickness, cornerRadius);
+            }
+
             previous = current;
         }
     }
@@ -251,6 +270,78 @@ public sealed class Direct2DRenderContext : ITransformableRenderContext, IDepthT
 
     private IDWriteTextLayout CreateLayout(string text, HudTextStyle style) =>
         _textFactory.CreateTextLayout(text, _textFormats[style], float.MaxValue, float.MaxValue);
+
+    private float CornerRadius(float thickness) =>
+        Math.Clamp(_visual.LineCornerRadius, 0f, Math.Max(0f, thickness / 2f));
+
+    private void DrawRoundedLine(
+        HudPoint from,
+        HudPoint to,
+        ID2D1Brush brush,
+        float thickness,
+        float cornerRadius)
+    {
+        var start = ToVector2(from);
+        var end = ToVector2(to);
+        var direction = end - start;
+        var length = direction.Length();
+        if (length <= 0f)
+        {
+            return;
+        }
+
+        direction /= length;
+        var normal = new Vector2(-direction.Y, direction.X);
+        var halfThickness = thickness / 2f;
+        var alongRadius = direction * cornerRadius;
+        var acrossThickness = normal * halfThickness;
+
+        var startSide = start + acrossThickness;
+        var endSide = end + acrossThickness;
+        var endCorner = end + alongRadius + normal * (halfThickness - cornerRadius);
+        var endLowerCorner = end + alongRadius - normal * (halfThickness - cornerRadius);
+        var endLowerSide = end - acrossThickness;
+        var startLowerSide = start - acrossThickness;
+        var startLowerCorner = start - alongRadius - normal * (halfThickness - cornerRadius);
+        var startCorner = start - alongRadius + normal * (halfThickness - cornerRadius);
+
+        using var geometry = _factory.CreatePathGeometry();
+        using var sink = geometry.Open();
+
+        sink.BeginFigure(startSide, FigureBegin.Filled);
+        sink.AddLine(endSide);
+        sink.AddArc(new ArcSegment(
+            endCorner,
+            new Size(cornerRadius, cornerRadius),
+            0f,
+            SweepDirection.CounterClockwise,
+            ArcSize.Small));
+        sink.AddLine(endLowerCorner);
+        sink.AddArc(new ArcSegment(
+            endLowerSide,
+            new Size(cornerRadius, cornerRadius),
+            0f,
+            SweepDirection.CounterClockwise,
+            ArcSize.Small));
+        sink.AddLine(startLowerSide);
+        sink.AddArc(new ArcSegment(
+            startLowerCorner,
+            new Size(cornerRadius, cornerRadius),
+            0f,
+            SweepDirection.CounterClockwise,
+            ArcSize.Small));
+        sink.AddLine(startCorner);
+        sink.AddArc(new ArcSegment(
+            startSide,
+            new Size(cornerRadius, cornerRadius),
+            0f,
+            SweepDirection.CounterClockwise,
+            ArcSize.Small));
+        sink.EndFigure(FigureEnd.Closed);
+        sink.Close();
+
+        _target.FillGeometry(geometry, brush);
+    }
 
     private ID2D1SolidColorBrush Brush(HudPaint paint)
     {

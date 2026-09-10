@@ -124,6 +124,12 @@ public sealed class VisualSettings
     /// <summary>Stroke width in device-independent pixels for HUD geometry.</summary>
     public float LineThickness { get; set; } = 1.6f;
 
+    /// <summary>Shared corner radius in device-independent pixels for lines and arc segments. 0 disables rounding.</summary>
+    public float LineCornerRadius { get; set; } = 0.8f;
+
+    /// <summary>Thickness multiplier for the reticle ring and its level markers.</summary>
+    public float ReticleThicknessMultiplier { get; set; } = 1.0f;
+
     public TypographySettings Typography { get; set; } = new();
 
     /// <summary>Reticle radius as a fraction of the smaller overlay dimension.</summary>

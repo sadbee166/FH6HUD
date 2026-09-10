@@ -56,7 +56,12 @@ public sealed class ConfigurationReloadTests
         var incoming = new HudConfiguration
         {
             Overlay = new OverlaySettings { Opacity = 0.5 },
-            Visual = new VisualSettings { ReticleRadius = 0.42f },
+            Visual = new VisualSettings
+            {
+                ReticleRadius = 0.42f,
+                ReticleThicknessMultiplier = 1.75f,
+                LineCornerRadius = 0.35f,
+            },
             Telemetry = new TelemetrySettings
             {
                 Powerband = new PowerbandSettings { BinCount = 128 },
@@ -76,6 +81,8 @@ public sealed class ConfigurationReloadTests
         Assert.Same(frame, current.Telemetry.TractionControl.Frame);
         Assert.Equal(0.5, current.Overlay.Opacity);
         Assert.Equal(0.42f, current.Visual.ReticleRadius);
+        Assert.Equal(1.75f, current.Visual.ReticleThicknessMultiplier);
+        Assert.Equal(0.35f, current.Visual.LineCornerRadius);
         Assert.Equal(128, current.Telemetry.Powerband.BinCount);
         Assert.Equal(0.8f, current.Telemetry.TractionControl.Frame.RegionX);
         Assert.Same(elements, current.Elements);

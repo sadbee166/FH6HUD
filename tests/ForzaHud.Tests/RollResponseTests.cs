@@ -187,6 +187,35 @@ public sealed class RollResponseTests
     }
 
     [Fact]
+    public void ReticleElementAppliesDedicatedThicknessMultiplierToRingAndMarkers()
+    {
+        var configuration = new HudConfiguration();
+        var visual = configuration.Visual;
+        visual.LineThickness = 2.0f;
+        visual.ReticleThicknessMultiplier = 1.75f;
+
+        var element = new ReticleElement(visual.Meters.Rpm);
+        var context = new DetailedRecordingRenderContext();
+        var frame = new HudFrame(
+            State: new DerivedState { IsDriving = true },
+            Display: new HudDisplay(),
+            Visual: visual,
+            Theme: HudTheme.From(visual.Theme),
+            Origin: new HudPoint(500f, 500f),
+            Scale: 1f,
+            Opacity: 1f,
+            Width: 1000f,
+            Height: 1000f,
+            GForceFullScale: 1.5f);
+
+        element.Draw(context, in frame);
+
+        Assert.Equal(3.5f, context.Arcs[0].Thickness);
+        Assert.Equal(3.5f, context.Arcs[1].Thickness);
+        Assert.All(context.Lines, line => Assert.Equal(3.5f, line.Thickness));
+    }
+
+    [Fact]
     public void ReticleElementCounterRotatesMarkersRelativeToPanel()
     {
         var configuration = new HudConfiguration();
@@ -334,13 +363,13 @@ public sealed class RollResponseTests
         public float Height => 1000;
 
         public List<DrawnLine> Lines { get; } = [];
-        public List<(HudPoint Center, float RadiusX, float RadiusY, float StartAngle, float SweepAngle)> Arcs { get; } = [];
+        public List<(HudPoint Center, float RadiusX, float RadiusY, float StartAngle, float SweepAngle, float Thickness)> Arcs { get; } = [];
 
         public void DrawLine(HudPoint from, HudPoint to, HudPaint paint, float thickness) =>
             Lines.Add(new DrawnLine(from, to, paint, thickness));
 
         public void DrawArc(HudPoint center, float radiusX, float radiusY, float startAngle, float sweepAngle, HudPaint paint, float thickness) =>
-            Arcs.Add((center, radiusX, radiusY, startAngle, sweepAngle));
+            Arcs.Add((center, radiusX, radiusY, startAngle, sweepAngle, thickness));
 
         public void DrawEllipse(HudPoint center, float radiusX, float radiusY, HudPaint paint, float thickness) { }
         public void FillEllipse(HudPoint center, float radiusX, float radiusY, HudPaint paint) { }

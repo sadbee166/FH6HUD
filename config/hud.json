@@ -26,13 +26,15 @@
     "monitor": 0,
     "opacity": 1.0,
     // 当 FH6 报告玩家当前未驾驶时隐藏 HUD。
-    "hideWhenNotDriving": true,
+    "hideWhenNotDriving": false,
     "targetFramesPerSecond": 120
   },
 
   "visual": {
     "fontFamily": "Segoe UI",
     "lineThickness": 2.4,
+    "lineCornerRadius": 2,
+    "reticleThicknessMultiplier": 1.5,
 
     "typography": {
       "labelSize": 11,
@@ -278,7 +280,7 @@
 
   "hotkeys": {
     "exit": "Ctrl+Alt+H",
-    // 开始和结束一次全新的直线校准。
+    // 手动校准，已经可以被完全代替
     "toggleCalibration": "Ctrl+Alt+R",
     "deleteCalibration": "Ctrl+Alt+K",
     "toggleRpmCalibration": "Ctrl+Alt+P",

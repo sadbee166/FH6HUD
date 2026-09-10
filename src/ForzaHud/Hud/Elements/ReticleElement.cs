@@ -33,12 +33,13 @@ public sealed class ReticleElement : IHudElement
         }
 
         var paint = new HudPaint(color, frame.Visual.Opacity.Reticle * frame.Opacity);
+        var thickness = frame.Visual.LineThickness * frame.Visual.ReticleThicknessMultiplier;
 
         var gap = GapDegrees;
         var sweep = 180f - (2f * gap);
 
-        context.DrawArc(frame.Origin, radius, radius, gap, sweep, paint, frame.Visual.LineThickness);
-        context.DrawArc(frame.Origin, radius, radius, 180f + gap, sweep, paint, frame.Visual.LineThickness);
+        context.DrawArc(frame.Origin, radius, radius, gap, sweep, paint, thickness);
+        context.DrawArc(frame.Origin, radius, radius, 180f + gap, sweep, paint, thickness);
 
         var markerLength = radius * frame.Visual.ReticleLevelMarkerLength;
         if (markerLength > 0f)
@@ -67,8 +68,8 @@ public sealed class ReticleElement : IHudElement
                 frame.Origin.X + (radius - markerLength) * cos,
                 frame.Origin.Y + (radius - markerLength) * sin);
 
-            context.DrawLine(leftStart, leftEnd, paint, frame.Visual.LineThickness);
-            context.DrawLine(rightStart, rightEnd, paint, frame.Visual.LineThickness);
+            context.DrawLine(leftStart, leftEnd, paint, thickness);
+            context.DrawLine(rightStart, rightEnd, paint, thickness);
         }
     }
 }

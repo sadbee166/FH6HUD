@@ -68,8 +68,8 @@
       "yawPivotX": 0.5,
       "pitchPivotY": 0.5,
       // 旋转响应。角速度单位为弧度/秒。
-      "yawDegreesPerAngularVelocity": 30,
-      "pitchDegreesPerAngularVelocity": 30,
+      "yawDegreesPerAngularVelocity": 25,
+      "pitchDegreesPerAngularVelocity": 25,
       "maximumYawRotationDegrees": 360.0,
       "maximumPitchRotationDegrees": 360.0,
       "levelSpeedAndGear": true,
@@ -256,7 +256,7 @@
       "maximumRpmDrop": 50,
       "rpmRateChangeFraction": 0.35,
       // 达到峰值功率该比例或更高的发动机功率定义主要功率带。
-      "powerbandFraction": 0.95,
+      "powerbandFraction": 0.9,
       "effectiveRedlinePercentile": 0.99,
       // 选择峰值功率时排除的最高 RPM 样本比例。
       "peakPowerTopPercentile": 0.025,

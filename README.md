@@ -1,5 +1,5 @@
 ## FH6HUD
-基于CLI的极限竞速：地平线6外置HUD，解决内置HUD看上去不够有张力的问题，建议配合Immersive Camera Enhanced使用（https://www.nexusmods.com/forzahorizon6/mods/417）
+基于CLI的极限竞速：地平线6外置HUD，解决内置HUD看上去不够有张力的问题，建议配合Immersive Camera Enhanced使用（ https://www.nexusmods.com/forzahorizon6/mods/417 ）
 
 可能会有bug，我遇到的都修好了，但是也没有彻底测试过
 

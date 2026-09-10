@@ -1,5 +1,5 @@
 *.md
-
+!README.md
 # .NET build and test output.
 [Bb]in/
 [Oo]bj/

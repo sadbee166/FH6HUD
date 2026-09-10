@@ -29,5 +29,7 @@
 - CTRL+ALT+K可以删除当前车辆的记录，重启校准过程
 ## 配置
 默认配置文件：hud.json
+
 如果要调节动态响应，找visual.panelMotion
+
 颜色 - visual.theme, visual.opacity

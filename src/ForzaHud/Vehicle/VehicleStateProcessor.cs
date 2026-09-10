@@ -104,6 +104,16 @@ public sealed class VehicleStateProcessor
                 return new CalibrationToggleResult(IsRecording: false, Saved: false);
             }
 
+            if (_currentIdentity is { } identity)
+            {
+                var exact = _calibrationStore.FindExact(identity);
+                if (exact.Count > 0 && exact[0].IsRpmCalibrationDisabled)
+                {
+                    LogCalibration("RPM calibration is disabled for the current vehicle.");
+                    return new CalibrationToggleResult(IsRecording: false, Saved: false);
+                }
+            }
+
             if (_calibrationRecorder is null)
             {
                 _calibrationRecorder = new CalibrationRecorder(
@@ -153,6 +163,49 @@ public sealed class VehicleStateProcessor
             LogCalibration(
                 $"Deleted calibration records for {FormatIdentity(identity)} from "
                 + $"'{_calibrationStore.FilePath}'.");
+            return true;
+        }
+    }
+
+    /// <summary>Toggles the persisted per-vehicle RPM-calibration exclusion marker.</summary>
+    public bool TryToggleCurrentRpmCalibrationDisabled()
+    {
+        lock (_calibrationGate)
+        {
+            if (_currentIdentity is not { } identity)
+            {
+                LogCalibration("Cannot toggle RPM calibration: the current vehicle identity is unknown.");
+                return false;
+            }
+
+            var exact = _calibrationStore.FindExact(identity);
+            var existing = exact.Count > 0 ? exact[0] : null;
+            var isDisabled = existing?.IsRpmCalibrationDisabled == true;
+            List<PowerCurvePoint> powerCurve = isDisabled
+                ? []
+                : [new PowerCurvePoint(-1f, -1f)];
+            var calibration = existing is null
+                ? new VehicleCalibration(identity, powerCurve, [])
+                : existing with { PowerCurve = powerCurve };
+
+            if (!_calibrationStore.TrySave(calibration))
+            {
+                LogCalibration(
+                    $"FAILED: RPM calibration marker could not be saved to '{_calibrationStore.FilePath}'.");
+                return false;
+            }
+
+            _powerband.ClearCalibration();
+            _calibrationRecorder = null;
+            ResetCalibrationOutputState();
+            if (_configuration.Calibration.Live.Enabled)
+            {
+                ResetLiveVehicle(identity);
+            }
+
+            LogCalibration(isDisabled
+                ? $"Enabled RPM calibration for {FormatIdentity(identity)}."
+                : $"Disabled RPM calibration for {FormatIdentity(identity)} using the placeholder power curve.");
             return true;
         }
     }
@@ -252,7 +305,7 @@ public sealed class VehicleStateProcessor
                     && !identity.IsElectric)
                 {
                     var exact = _calibrationStore.FindExact(identity);
-                    if (exact.Count > 0)
+                    if (exact.Count > 0 && !exact[0].IsRpmCalibrationDisabled)
                     {
                         _powerband.ApplyCalibration(exact[0], _configuration.Telemetry.Powerband);
                     }
@@ -353,6 +406,15 @@ public sealed class VehicleStateProcessor
         var exact = _calibrationStore.FindExact(identity);
         var stored = exact.Count > 0 ? exact[0] : null;
         _liveMatchedCalibration = stored;
+
+        if (stored?.IsRpmCalibrationDisabled == true)
+        {
+            _liveState = LiveCalibrationState.Monitoring;
+            _calibrationRecorder = null;
+            _liveShiftLogger = new ShiftUpRpmDropRatioLogger();
+            LogCalibration("RPM calibration is disabled for this vehicle; collecting shift ratios only.");
+            return;
+        }
 
         if (stored?.PowerCurve is { Count: > 0 })
         {
@@ -476,6 +538,7 @@ public sealed class VehicleStateProcessor
     {
         if (_powerCollectionFinished
             || _currentIdentity is not { } identity
+            || _liveMatchedCalibration?.IsRpmCalibrationDisabled == true
             || !recorder.TryGetPowerCurve(out var liveCurve))
         {
             return false;
@@ -550,7 +613,11 @@ public sealed class VehicleStateProcessor
     {
         var exact = _calibrationStore.FindExact(identity);
         _liveMatchedCalibration = exact.Count > 0 ? exact[0] : null;
-        if (_liveMatchedCalibration is { PowerCurve.Count: > 0 } saved)
+        if (_liveMatchedCalibration?.IsRpmCalibrationDisabled == true)
+        {
+            _powerband.ClearCalibration();
+        }
+        else if (_liveMatchedCalibration is { PowerCurve.Count: > 0 } saved)
         {
             _powerband.ApplyCalibration(saved, _configuration.Telemetry.Powerband);
         }

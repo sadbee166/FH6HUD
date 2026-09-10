@@ -159,8 +159,8 @@ public sealed class CommandLineOptions
           --at <seconds>        Scenario time for --snapshot (default 0).
           --help                Show this text.
 
-        While the overlay is running, Ctrl+Alt+H closes it, Ctrl+Alt+K deletes calibration
-        records for the current car, and Ctrl+Alt+L reloads the utility. Valid edits to the
+        While the overlay is running, the configured global hotkeys can close it, delete
+        calibration records for the current car, or reload the utility. Valid edits to the
         active configuration file are applied automatically before the next HUD frame.
         Invalid edits are ignored until the file becomes valid again.
         During replay, SPACE pauses, S steps a frame, R restarts, and +/- change speed.

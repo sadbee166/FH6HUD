@@ -158,6 +158,7 @@ public static class ConfigurationLoader
         configuration.Telemetry.TractionControl.TireSlip ??= new TireSlipTcsSettings();
         configuration.Telemetry.TractionControl.Frame ??= new FrameTcsSettings();
         configuration.Recording ??= new RecordingSettings();
+        configuration.Hotkeys ??= new HotkeySettings();
         configuration.Calibration ??= new CalibrationSettings();
         configuration.Calibration.Live ??= new LiveCalibrationSettings();
         configuration.Calibration.Live.PowerCurve ??= new LivePowerCurveSettings();
@@ -232,12 +233,6 @@ public static class ConfigurationLoader
         {
             diagnostics.Add("calibration.carOrdinalNamesFile must not be empty; falling back to Forza Horizon 6 Car Ordinals.json.");
             configuration.Calibration.CarOrdinalNamesFile = "Forza Horizon 6 Car Ordinals.json";
-        }
-
-        if (string.IsNullOrWhiteSpace(configuration.Calibration.ToggleHotkey))
-        {
-            diagnostics.Add("calibration.toggleHotkey must not be empty; falling back to Ctrl+Alt+R.");
-            configuration.Calibration.ToggleHotkey = "Ctrl+Alt+R";
         }
 
         ValidateLiveCalibration(configuration.Calibration.Live, diagnostics);

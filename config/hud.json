@@ -276,12 +276,19 @@
     "outputDirectory": "sessions"
   },
 
+  "hotkeys": {
+    "exit": "Ctrl+Alt+H",
+    // 开始和结束一次全新的直线校准。
+    "toggleCalibration": "Ctrl+Alt+R",
+    "deleteCalibration": "Ctrl+Alt+K",
+    "toggleRpmCalibration": "Ctrl+Alt+P",
+    "reload": "Ctrl+Alt+L"
+  },
+
   "calibration": {
-    // Ctrl+Alt+R 开始和结束一次全新的直线校准。
     "dataFile": "forzahud-calibration.json",
     "rawSamplesDirectory": "forzahud-calibration-raw",
     "carOrdinalNamesFile": "car-ordinals.json",
-    "toggleHotkey": "Ctrl+Alt+R",
     // 设置为 false 可禁用终端中的校准进度和结果消息。
     "verboseOutput": true,
     "live": {

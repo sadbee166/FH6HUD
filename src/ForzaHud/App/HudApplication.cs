@@ -76,6 +76,7 @@ public sealed class HudApplication : IDisposable
         Window = new OverlayWindow(configuration, factory, textFactory);
         Window.Render += OnRender;
         Window.CalibrationDeleteRequested += OnCalibrationDelete;
+        Window.RpmCalibrationToggleRequested += OnRpmCalibrationToggle;
         Window.ReloadRequested += OnReload;
         Window.CalibrationToggleRequested += OnCalibrationToggle;
     }
@@ -238,6 +239,16 @@ public sealed class HudApplication : IDisposable
         _processor.TryDeleteCurrentCalibration();
     }
 
+    private void OnRpmCalibrationToggle()
+    {
+        if (_configuration.Calibration.VerboseOutput)
+        {
+            ConsoleHost.Attach();
+        }
+
+        _processor.TryToggleCurrentRpmCalibrationDisabled();
+    }
+
     private void OnReload()
     {
         ShouldReload = true;
@@ -396,6 +407,7 @@ public sealed class HudApplication : IDisposable
         _source.PacketReceived -= OnPacketReceived;
         _processor.FinishCalibrationRecording();
         Window.CalibrationDeleteRequested -= OnCalibrationDelete;
+        Window.RpmCalibrationToggleRequested -= OnRpmCalibrationToggle;
         Window.ReloadRequested -= OnReload;
         Window.CalibrationToggleRequested -= OnCalibrationToggle;
         _recorder?.Dispose();

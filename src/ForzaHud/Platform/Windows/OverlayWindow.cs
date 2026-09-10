@@ -20,9 +20,7 @@ public sealed class OverlayWindow : IDisposable
     private const int CalibrationHotKeyId = 2;
     private const int DeleteCalibrationHotKeyId = 3;
     private const int ReloadHotKeyId = 4;
-    private const uint VirtualKeyH = 0x48;
-    private const uint VirtualKeyK = 0x4B;
-    private const uint VirtualKeyL = 0x4C;
+    private const int ToggleRpmCalibrationHotKeyId = 5;
 
     private const uint SWP_NOACTIVATE = 0x0010;
     private const uint SWP_SHOWWINDOW = 0x0040;
@@ -39,7 +37,7 @@ public sealed class OverlayWindow : IDisposable
     private int _pixelWidth;
     private int _pixelHeight;
     private int _activeMonitorIndex;
-    private bool _calibrationHotkeyRegistered;
+    private readonly HashSet<int> _registeredHotkeyIds = [];
     private bool _presenterRefreshPending;
 
     /// <param name="configuration">HUD configuration.</param>
@@ -64,10 +62,13 @@ public sealed class OverlayWindow : IDisposable
     /// <summary>Called by the configured global hotkey to toggle calibration recording.</summary>
     public event Action? CalibrationToggleRequested;
 
-    /// <summary>Called by Ctrl+Alt+K to delete calibration records for the current vehicle.</summary>
+    /// <summary>Called by the configured hotkey to delete calibration records for the current vehicle.</summary>
     public event Action? CalibrationDeleteRequested;
 
-    /// <summary>Called by Ctrl+Alt+L to restart the utility.</summary>
+    /// <summary>Called by the configured hotkey to toggle RPM calibration for the current vehicle.</summary>
+    public event Action? RpmCalibrationToggleRequested;
+
+    /// <summary>Called by the configured hotkey to restart the utility.</summary>
     public event Action? ReloadRequested;
 
     /// <summary>Window handle, valid once <see cref="Run"/> has been called.</summary>
@@ -75,10 +76,8 @@ public sealed class OverlayWindow : IDisposable
 
     /// <summary>
     /// Creates the window and runs the message and render loop until the window is closed
-    /// or a control hotkey is pressed. Ctrl+Alt+H exits, Ctrl+Alt+K deletes the current
-    /// vehicle's calibration records, and Ctrl+Alt+L restarts the utility. Valid edits to the
-    /// active configuration file are applied automatically before the next HUD frame. The
-    /// calibration hotkey is registered from <see cref="CalibrationSettings.ToggleHotkey"/>
+    /// or a configured control hotkey is pressed. Valid edits to the active configuration file
+    /// are applied automatically before the next HUD frame. The calibration hotkey is registered
     /// only when live calibration is disabled.
     /// </summary>
     public void Run()
@@ -113,51 +112,16 @@ public sealed class OverlayWindow : IDisposable
             monitor.Left, monitor.Top, monitor.Width, monitor.Height,
             SWP_NOACTIVATE | SWP_SHOWWINDOW);
 
-        var exitRegistered = false;
-        var deleteCalibrationRegistered = false;
-        var reloadRegistered = false;
         try
         {
-            exitRegistered = NativeMethods.RegisterHotKey(
-                _handle, ExitHotKeyId,
-                NativeMethods.MOD_CONTROL | NativeMethods.MOD_ALT | NativeMethods.MOD_NOREPEAT,
-                VirtualKeyH);
-
-            RegisterCalibrationHotkey();
-
-            deleteCalibrationRegistered = NativeMethods.RegisterHotKey(
-                _handle,
-                DeleteCalibrationHotKeyId,
-                NativeMethods.MOD_CONTROL | NativeMethods.MOD_ALT | NativeMethods.MOD_NOREPEAT,
-                VirtualKeyK);
-
-            reloadRegistered = NativeMethods.RegisterHotKey(
-                _handle,
-                ReloadHotKeyId,
-                NativeMethods.MOD_CONTROL | NativeMethods.MOD_ALT | NativeMethods.MOD_NOREPEAT,
-                VirtualKeyL);
+            RegisterHotkeys();
 
             _activeWindow = this;
             MessageLoop();
         }
         finally
         {
-            if (reloadRegistered)
-            {
-                NativeMethods.UnregisterHotKey(_handle, ReloadHotKeyId);
-            }
-
-            if (deleteCalibrationRegistered)
-            {
-                NativeMethods.UnregisterHotKey(_handle, DeleteCalibrationHotKeyId);
-            }
-
-            UnregisterCalibrationHotkey();
-
-            if (exitRegistered)
-            {
-                NativeMethods.UnregisterHotKey(_handle, ExitHotKeyId);
-            }
+            UnregisterHotkeys();
 
             if (ReferenceEquals(_activeWindow, this))
             {
@@ -199,8 +163,8 @@ public sealed class OverlayWindow : IDisposable
                 SWP_NOACTIVATE | SWP_SHOWWINDOW);
         }
 
-        UnregisterCalibrationHotkey();
-        RegisterCalibrationHotkey();
+        UnregisterHotkeys();
+        RegisterHotkeys();
 
         // The DirectWrite formats cache the configured font family. Recreate the presenter so
         // a font change takes effect on the next frame. Defer disposal when this is called from
@@ -264,29 +228,49 @@ public sealed class OverlayWindow : IDisposable
         }
     }
 
-    private void RegisterCalibrationHotkey()
+    private void RegisterHotkeys()
     {
-        if (_handle == IntPtr.Zero
-            || _configuration.Calibration.Live.Enabled
-            || !HotkeyDefinition.TryParse(_configuration.Calibration.ToggleHotkey, out var hotkey))
+        if (_handle == IntPtr.Zero)
         {
             return;
         }
 
-        _calibrationHotkeyRegistered = NativeMethods.RegisterHotKey(
-            _handle,
-            CalibrationHotKeyId,
-            hotkey.Modifiers | NativeMethods.MOD_NOREPEAT,
-            hotkey.VirtualKey);
+        RegisterHotkey(ExitHotKeyId, _configuration.Hotkeys.Exit);
+        if (!_configuration.Calibration.Live.Enabled)
+        {
+            RegisterHotkey(CalibrationHotKeyId, _configuration.Hotkeys.ToggleCalibration);
+        }
+
+        RegisterHotkey(DeleteCalibrationHotKeyId, _configuration.Hotkeys.DeleteCalibration);
+        RegisterHotkey(ToggleRpmCalibrationHotKeyId, _configuration.Hotkeys.ToggleRpmCalibration);
+        RegisterHotkey(ReloadHotKeyId, _configuration.Hotkeys.Reload);
     }
 
-    private void UnregisterCalibrationHotkey()
+    private void RegisterHotkey(int id, string? binding)
     {
-        if (_calibrationHotkeyRegistered)
+        if (!HotkeyDefinition.TryParse(binding, out var hotkey))
         {
-            NativeMethods.UnregisterHotKey(_handle, CalibrationHotKeyId);
-            _calibrationHotkeyRegistered = false;
+            return;
         }
+
+        if (NativeMethods.RegisterHotKey(
+                _handle,
+                id,
+                hotkey.Modifiers | NativeMethods.MOD_NOREPEAT,
+                hotkey.VirtualKey))
+        {
+            _registeredHotkeyIds.Add(id);
+        }
+    }
+
+    private void UnregisterHotkeys()
+    {
+        foreach (var id in _registeredHotkeyIds)
+        {
+            NativeMethods.UnregisterHotKey(_handle, id);
+        }
+
+        _registeredHotkeyIds.Clear();
     }
 
     private static uint WaitMilliseconds(TimeSpan delay)
@@ -412,6 +396,12 @@ public sealed class OverlayWindow : IDisposable
                 if (wParam.ToInt32() == DeleteCalibrationHotKeyId)
                 {
                     _activeWindow?.CalibrationDeleteRequested?.Invoke();
+                    return IntPtr.Zero;
+                }
+
+                if (wParam.ToInt32() == ToggleRpmCalibrationHotKeyId)
+                {
+                    _activeWindow?.RpmCalibrationToggleRequested?.Invoke();
                     return IntPtr.Zero;
                 }
 

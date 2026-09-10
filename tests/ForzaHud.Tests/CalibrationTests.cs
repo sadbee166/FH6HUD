@@ -192,6 +192,41 @@ public sealed class CalibrationTests
     }
 
     [Fact]
+    public void ProcessorTogglesThePerVehicleRpmCalibrationMarker()
+    {
+        var path = TemporaryPath();
+        try
+        {
+            var configuration = new HudConfiguration();
+            configuration.Calibration.Live.Enabled = false;
+            var store = new CalibrationDataStore(path);
+            Assert.True(store.TrySave(Calibration(new VehicleIdentity(10, 800, 2, 6, 8000f), 4000f)));
+
+            var processor = new VehicleStateProcessor(configuration, store);
+            processor.Process(Snapshot(new VehicleIdentity(10, 800, 2, 6, 8000f)));
+            Assert.True(processor.Powerband.IsLearned);
+
+            Assert.True(processor.TryToggleCurrentRpmCalibrationDisabled());
+            var disabled = Assert.Single(store.FindExact(new VehicleIdentity(10, 800, 2, 6, 8000f)));
+            Assert.True(disabled.IsRpmCalibrationDisabled);
+            Assert.Equal([new PowerCurvePoint(-1f, -1f)], disabled.PowerCurve);
+            Assert.Equal([0.5f], disabled.ShiftUpRpmDropRatioByGear[1]);
+            Assert.False(processor.Powerband.IsLearned);
+            Assert.False(processor.ToggleCalibrationRecording().IsRecording);
+
+            Assert.True(processor.TryToggleCurrentRpmCalibrationDisabled());
+            var enabled = Assert.Single(store.FindExact(new VehicleIdentity(10, 800, 2, 6, 8000f)));
+            Assert.False(enabled.IsRpmCalibrationDisabled);
+            Assert.Empty(enabled.PowerCurve);
+            Assert.Equal([0.5f], enabled.ShiftUpRpmDropRatioByGear[1]);
+        }
+        finally
+        {
+            DeleteIfPresent(path);
+        }
+    }
+
+    [Fact]
     public void DataStoreMigratesLegacyInlineRawPowerSamplesToSidecarOnSave()
     {
         var path = TemporaryPath();

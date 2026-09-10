@@ -59,6 +59,11 @@ public sealed record VehicleCalibration(
     [JsonPropertyOrder(-1)]
     public string? CarName { get; init; }
 
+    /// <summary>Whether this record explicitly disables RPM calibration for the vehicle.</summary>
+    public bool IsRpmCalibrationDisabled =>
+        PowerCurve.Count == 1
+        && PowerCurve[0] == new PowerCurvePoint(-1f, -1f);
+
 
 
 }

@@ -20,6 +20,8 @@ public sealed class HudConfiguration
 
     public RecordingSettings Recording { get; set; } = new();
 
+    public HotkeySettings Hotkeys { get; set; } = new();
+
     public CalibrationSettings Calibration { get; set; } = new();
 
     /// <summary>
@@ -750,6 +752,25 @@ public sealed class RecordingSettings
     public string OutputDirectory { get; set; } = "sessions";
 }
 
+/// <summary>Global overlay hotkeys.</summary>
+public sealed class HotkeySettings
+{
+    /// <summary>Closes the overlay.</summary>
+    public string Exit { get; set; } = "Ctrl+Alt+H";
+
+    /// <summary>Toggles manual calibration recording.</summary>
+    public string ToggleCalibration { get; set; } = "Ctrl+Alt+R";
+
+    /// <summary>Deletes calibration records for the current vehicle.</summary>
+    public string DeleteCalibration { get; set; } = "Ctrl+Alt+K";
+
+    /// <summary>Toggles RPM calibration for the current vehicle.</summary>
+    public string ToggleRpmCalibration { get; set; } = "Ctrl+Alt+P";
+
+    /// <summary>Restarts the utility.</summary>
+    public string Reload { get; set; } = "Ctrl+Alt+L";
+}
+
 /// <summary>Persistent calibration controls. Raw session recording remains independent.</summary>
 public sealed class CalibrationSettings
 {
@@ -761,9 +782,6 @@ public sealed class CalibrationSettings
 
     /// <summary>Car ordinal name catalog file, resolved relative to the application directory.</summary>
     public string CarOrdinalNamesFile { get; set; } = "Forza Horizon 6 Car Ordinals.json";
-
-    /// <summary>Global hotkey used to toggle calibration recording.</summary>
-    public string ToggleHotkey { get; set; } = "Ctrl+Alt+R";
 
     /// <summary>Whether calibration progress and results are printed to the terminal.</summary>
     public bool VerboseOutput { get; set; } = true;

@@ -110,6 +110,39 @@ public sealed class LiveCalibrationTests
     }
 
     [Fact]
+    public void PlaceholderPowerCurveDisablesLiveRpmCalibrationEvenWhenOverwriteIsAllowed()
+    {
+        var path = TemporaryPath();
+        try
+        {
+            var configuration = LiveConfiguration();
+            configuration.Calibration.Live.AllowOverwrite = true;
+            configuration.Calibration.Live.PowerCurve.StopSampleCount = 2;
+            configuration.Calibration.Live.PowerCurve.StopRpmCoverageFraction = 0.1f;
+            var store = new CalibrationDataStore(path);
+            Assert.True(store.TrySave(new VehicleCalibration(
+                Identity,
+                [new PowerCurvePoint(-1f, -1f)],
+                new Dictionary<int, List<float>>() )));
+
+            var processor = new VehicleStateProcessor(configuration, store);
+            processor.Process(Snapshot(2000f, 100f));
+            processor.Process(Snapshot(4000f, 300f));
+            processor.Process(Snapshot(6000f, 200f));
+
+            Assert.False(processor.IsCalibrationRecording);
+            Assert.False(processor.Powerband.IsLearned);
+            var saved = Assert.Single(store.FindExact(Identity));
+            Assert.True(saved.IsRpmCalibrationDisabled);
+            Assert.Equal([new PowerCurvePoint(-1f, -1f)], saved.PowerCurve);
+        }
+        finally
+        {
+            DeleteIfPresent(path);
+        }
+    }
+
+    [Fact]
     public void ShiftRatiosCollectWhenExistingPowerCurveCannotBeOverwritten()
     {
         var path = TemporaryPath();

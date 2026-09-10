@@ -26,7 +26,7 @@
     "monitor": 0,
     "opacity": 1.0,
     // 当 FH6 报告玩家当前未驾驶时隐藏 HUD。
-    "hideWhenNotDriving": false,
+    "hideWhenNotDriving": true,
     "targetFramesPerSecond": 120
   },
 
@@ -56,7 +56,7 @@
       "enabled": true,
       // 以毫秒为单位的时间常数。0 表示禁用运动平滑。
       "smoothingMilliseconds": 150,
-      "scalePerLongitudinalG": -0.15,
+      "scalePerLongitudinalG": -0.1,
       "scalePer100Kph": 0.05,
       "verticalMovePerLongitudinalG": -0.01,
       "verticalMovePerVerticalG": -0.025,
@@ -68,8 +68,8 @@
       "yawPivotX": 0.5,
       "pitchPivotY": 0.5,
       // 旋转响应。角速度单位为弧度/秒。
-      "yawDegreesPerAngularVelocity": 20,
-      "pitchDegreesPerAngularVelocity": 20,
+      "yawDegreesPerAngularVelocity": 30,
+      "pitchDegreesPerAngularVelocity": 30,
       "maximumYawRotationDegrees": 360.0,
       "maximumPitchRotationDegrees": 360.0,
       "levelSpeedAndGear": true,

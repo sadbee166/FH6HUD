@@ -3,11 +3,10 @@ using System.Runtime.InteropServices;
 namespace ForzaHud.Platform.Windows;
 
 /// <summary>
-/// Console management for a windowed application.
+/// Console management for the HUD executable.
 ///
-/// The HUD ships as a windowed executable so launching it never flashes a console over the
-/// game, which means any mode that needs text output or keyboard input has to attach to the
-/// console that launched it.
+/// The HUD is a console executable so Windows creates a console when it is launched directly;
+/// attaching remains useful when a launcher already owns the console.
 /// </summary>
 public static class ConsoleHost
 {

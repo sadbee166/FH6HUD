@@ -19,6 +19,7 @@
 1. 下载Release中的二进制文件或者下载.NET10 SDK然后运行BUILD.bat
 2. 启动游戏和ForzaHud.exe
 3. 检查视觉效果是否符合你的喜好
+
 功率曲线校准：
 - 使用气缸数量，性能等级，最大转速，传动系统类型还有车辆ID确认身份，只有所有都符合的个体才会被算作同一辆车
 - 数据默认储存在forzahud-calibration.json

@@ -1,6 +1,5 @@
 ## FH6HUD
-基于CLI的极限竞速：地平线6外置HUD，解决内置HUD看上去不够有张力的问题，建议配合Immersive Camera Enhanced使用（ https://www.nexusmods.com/forzahorizon6/mods/417 ）
-
+基于CLI的极限竞速：地平线6外置HUD，解决内置HUD看上去不够有张力的问题，推荐配合Immersive Camera Enhanced使用（ https://www.nexusmods.com/forzahorizon6/mods/417 ）
 可能会有bug，我遇到的都修好了，但是也没有彻底测试过
 
 ## 功能
@@ -19,9 +18,10 @@
 
 ## 使用
 1. 下载Release中的二进制文件或者下载.NET10 SDK然后运行BUILD.bat
-2. 启动游戏和ForzaHud.exe
-3. **在游戏设置中打开数据遥测**，程序默认读取127.0.0.1:2247
-4. 检查视觉效果是否符合你的喜好
+2. 如果要安装Immersive Camera Enhanced，把Immersive.Camera.ENHANCED.zip中的mediapc文件夹解压到游戏根目录
+3. 启动游戏和ForzaHud.exe
+4. **在游戏设置中打开数据遥测**，程序默认读取``127.0.0.1:2247``
+5. 检查视觉效果是否符合你的喜好
 
 功率曲线校准：
 - 使用气缸数量，性能等级，最大转速，传动系统类型还有车辆ID确认身份，只有所有都符合的个体才会被算作同一辆车
